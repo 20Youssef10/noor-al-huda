@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Mobile artifacts
+apps/mobile/node_modules/
+apps/mobile/dist-web/
+apps/mobile/.expo/
+apps/mobile/.credentials/
+apps/mobile/credentials.json
+apps/mobile/android/.gradle/
+apps/mobile/android/build/
+apps/mobile/android/app/build/
+apps/mobile/ios/build/
+apps/mobile/ios/Pods/
+
+# Worker artifacts
+workers/node_modules/
+workers/dist/
+workers/scripts/data/
+scripts/data/
+
+# Logs and local env
+*.log
+.DS_Store
+.env
+.env.local

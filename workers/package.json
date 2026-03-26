@@ -1,0 +1,20 @@
+{
+  "name": "noor-al-huda-workers",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ./node_modules/esbuild/bin/esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/worker.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node ./node_modules/esbuild/bin/esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/worker.mjs && node --test test/**/*.test.mjs"
+  },
+  "dependencies": {
+    "adhan": "^4.4.3",
+    "hono": "^4.9.9",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260317.1",
+    "esbuild": "^0.25.11",
+    "typescript": "^5.9.2"
+  }
+}

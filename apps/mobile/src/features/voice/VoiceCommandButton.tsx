@@ -1,0 +1,92 @@
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
+import { useRouter } from 'expo-router';
+import TrackPlayer from 'react-native-track-player';
+import { z } from 'zod';
+
+import { apiBaseUrl } from '../../lib/api';
+import { theme } from '../../lib/theme';
+
+const voiceSchema = z.object({
+  transcript: z.string(),
+  intent: z.string(),
+  params: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).default({}),
+  confidence: z.number().optional(),
+});
+
+export function VoiceCommandButton() {
+  const router = useRouter();
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [transcript, setTranscript] = useState('');
+
+  async function startRecording() {
+    const permission = await Audio.requestPermissionsAsync();
+    if (permission.status !== 'granted') return;
+    const instance = new Audio.Recording();
+    await instance.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+    await instance.startAsync();
+    setRecording(instance);
+  }
+
+  async function stopRecording() {
+    if (!recording) return;
+    await recording.stopAndUnloadAsync();
+    const uri = recording.getURI();
+    setRecording(null);
+    if (!uri) return;
+    const blob = await (await fetch(uri)).blob();
+    const form = new FormData();
+    form.append('audio', blob, 'voice.m4a');
+    const response = await fetch(`${apiBaseUrl}/api/voice/command`, { method: 'POST', body: form });
+    const payload = voiceSchema.parse(await response.json());
+    setTranscript(payload.transcript);
+    await executeIntent(payload);
+  }
+
+  async function executeIntent(intent: z.infer<typeof voiceSchema>) {
+    switch (intent.intent) {
+      case 'OPEN_SURAH':
+        if (typeof intent.params.surah_number === 'number') router.push(`/quran/${intent.params.surah_number}`);
+        break;
+      case 'PRAYER_TIME':
+        router.push('/(tabs)/prayer');
+        break;
+      case 'PLAY_RADIO':
+        router.push('/(tabs)/radio');
+        break;
+      case 'STOP_AUDIO':
+        await TrackPlayer.pause();
+        break;
+      case 'OPEN_AZKAR':
+        router.push('/(tabs)/azkar');
+        break;
+      default:
+        break;
+    }
+    Speech.speak(`تم تنفيذ الأمر: ${intent.intent}`, { language: 'ar' });
+  }
+
+  return (
+    <View style={styles.wrapper}>
+      <Pressable
+        accessibilityLabel="زر الأوامر الصوتية"
+        onLongPress={() => void startRecording()}
+        onPressOut={() => void stopRecording()}
+        style={[styles.button, recording ? styles.buttonActive : null]}
+      >
+        <Text style={styles.buttonText}>{recording ? '... استمع' : '🎤'}</Text>
+      </Pressable>
+      {transcript ? <Text style={styles.transcript}>{transcript}</Text> : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrapper: { alignItems: 'flex-end', gap: 8 },
+  button: { width: 64, height: 64, borderRadius: 32, backgroundColor: theme.colors.gold, alignItems: 'center', justifyContent: 'center' },
+  buttonActive: { backgroundColor: theme.colors.emeraldLight },
+  buttonText: { color: '#1B150F', fontFamily: theme.fonts.bodyBlack, fontSize: 18 },
+  transcript: { color: theme.colors.creamFaint, fontFamily: theme.fonts.body, fontSize: 12, textAlign: 'right' },
+});

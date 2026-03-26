@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "1024474386791",
+    "project_id": "noor-al-huda-260326",
+    "storage_bucket": "noor-al-huda-260326.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1024474386791:android:3012220cd3906a662adfc2",
+        "android_client_info": {
+          "package_name": "com.nooralhuda.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1024474386791-ke5e2cul293465ugnkmvottp73u772hc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nooralhuda.app",
+            "certificate_hash": "a75bd798f905dbde4e8ee040464f44eab22ce293"
+          }
+        },
+        {
+          "client_id": "1024474386791-mth34nki4vjlh0vohnsp8uo1onk0u0bl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nooralhuda.app",
+            "certificate_hash": "8f01714dd69e90a0790790a0cf1918a1dee973fe"
+          }
+        },
+        {
+          "client_id": "1024474386791-knn9lhb6s0h3q4k14vbgkkl0h3chm8io.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASBC9CdIe0BTsPG5ZBEssFEHbDyYxQSSc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1024474386791-knn9lhb6s0h3q4k14vbgkkl0h3chm8io.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1024474386791-s5uf8704i6gkaufb07u2u9non124i5j6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nooralhuda.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

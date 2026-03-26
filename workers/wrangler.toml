@@ -1,0 +1,38 @@
+name = "noor-al-huda-api"
+main = "dist/worker.mjs"
+compatibility_date = "2026-03-26"
+compatibility_flags = ["nodejs_compat"]
+
+[ai]
+binding = "AI"
+
+[[vectorize]]
+binding = "QURAN_VECTORS"
+index_name = "quran-semantic-index"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[vars]
+FIREBASE_PROJECT_ID = "noor-al-huda-260326"
+
+[[kv_namespaces]]
+binding = "PRAYER_CACHE"
+id = "764eae6b3dc940e6b1f53ba7d073808f"
+
+[[kv_namespaces]]
+binding = "QURAN_CACHE"
+id = "9c8bad394a15405bbb7533410842b582"
+
+[[kv_namespaces]]
+binding = "HADITH_CACHE"
+id = "83adaf9d059b441ea15d4efc7e4fc543"
+
+[[kv_namespaces]]
+binding = "RADIO_LIST"
+id = "4c83b16f2dab49e58eafe619865b642f"
+
+[[kv_namespaces]]
+binding = "AZKAR_CACHE"
+id = "d44a5b9f35bc4545960e34ffdb77dd83"

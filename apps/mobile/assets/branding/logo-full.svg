@@ -1,0 +1,20 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" rx="80" fill="#13100A"/>
+  <rect x="72" y="72" width="1296" height="756" rx="52" stroke="#C9A84C" stroke-width="4" opacity="0.28"/>
+  <g transform="translate(128 138)">
+    <rect width="240" height="240" rx="52" fill="#1B150F"/>
+    <path d="M120 24C175 24 220 69 220 124C220 179 175 224 120 224C96 224 74 216 56 202C75 206 96 201 111 186C141 157 141 108 113 79C98 64 77 57 56 61C74 38 96 24 120 24Z" fill="#E8C97A"/>
+    <path d="M50 172C50 91 106 31 176 31C246 31 302 91 302 172V190H50V172Z" fill="#1A6B3C" opacity="0.92"/>
+    <path d="M98 206C127 187 152 178 176 178C200 178 225 187 254 206" stroke="#F8F3E8" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <text x="420" y="280" fill="#F8F3E8" font-size="180" font-family="Amiri, serif" font-weight="700">نور الهدى</text>
+  <text x="424" y="388" fill="#C9A84C" font-size="48" font-family="Cairo, sans-serif" font-weight="700">رفيقك الإسلامي اليومي</text>
+  <text x="424" y="470" fill="#D9D1C0" font-size="30" font-family="Cairo, sans-serif">
+    قرآن، صلاة، أذكار، وإذاعات بهوية عربية أصيلة وتجربة هادئة.
+  </text>
+  <path d="M424 550H1190" stroke="#C9A84C" stroke-width="3" opacity="0.35"/>
+  <path d="M424 620C520 570 612 548 700 548C788 548 880 570 976 620" stroke="#E8C97A" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
+  <path d="M482 686C551 649 624 631 700 631C776 631 849 649 918 686" stroke="#F8F3E8" stroke-width="8" stroke-linecap="round" opacity="0.72"/>
+  <circle cx="1236" cy="176" r="12" fill="#F8F3E8"/>
+  <circle cx="1286" cy="228" r="8" fill="#C9A84C"/>
+</svg>

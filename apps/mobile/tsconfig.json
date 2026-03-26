@@ -1,0 +1,17 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
+    "moduleSuffixes": [".native", ".ios", ".android", ".web", ""],
+    "types": [
+      "expo-router/types",
+      "jest"
+    ]
+  },
+  "exclude": [
+    "dist-web"
+  ]
+}
