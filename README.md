@@ -80,11 +80,14 @@ CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... python ./scripts/deploy_worke
 This repository includes two workflows:
 
 - `ci.yml`: installs dependencies, runs tests, type checks, and Expo Doctor
-- `eas-build.yml`: manually triggers an EAS cloud build
+- `direct-build.yml`: builds the app directly in GitHub Actions without EAS
 
-Required GitHub secrets for build workflow:
+`direct-build.yml` does the following:
 
-- `EXPO_TOKEN` — Expo/EAS access token
+- Android: runs `expo prebuild`, then `./gradlew assembleDebug`, and uploads a debug APK artifact
+- iOS: runs `expo prebuild`, `pod install`, then `xcodebuild` for a simulator app, and uploads a zipped `.app` artifact
+
+No Expo/EAS token is required for the direct build workflow.
 
 Optional GitHub secrets if you later automate worker deployment:
 
@@ -93,9 +96,8 @@ Optional GitHub secrets if you later automate worker deployment:
 
 ### Current build state
 
-- New EAS builds have been started from the latest fixes.
-- Android preview build ID: `27ba7766-8b32-4009-95fe-76b4690d8e0c`
-- iOS simulator build ID: `f00bce55-ca1f-47ba-96c5-c23e0cd7fdb3`
+- Repository workflow builds now target direct native build steps instead of EAS cloud build.
+- Older EAS builds were only used for debugging the native failures and are no longer the GitHub Actions path.
 
 ### Known caveats
 
@@ -180,11 +182,14 @@ CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... python ./scripts/deploy_worke
 يوجد مساران في GitHub Actions:
 
 - `ci.yml` للتثبيت والاختبارات وفحوص TypeScript و Expo Doctor
-- `eas-build.yml` لتشغيل بناء EAS يدوياً
+- `direct-build.yml` لبناء التطبيق مباشرة داخل GitHub Actions بدون EAS
 
-المتغير السري المطلوب للبناء:
+مسار `direct-build.yml` يقوم بالتالي:
 
-- `EXPO_TOKEN`
+- Android: تنفيذ `expo prebuild` ثم `./gradlew assembleDebug` ورفع ملف APK كـ artifact
+- iOS: تنفيذ `expo prebuild` ثم `pod install` ثم `xcodebuild` للمحاكي ورفع ملف `.app` مضغوط كـ artifact
+
+لا يحتاج هذا المسار إلى `EXPO_TOKEN`.
 
 ومتغيرات اختيارية إذا أردت لاحقاً نشر Cloudflare من GitHub:
 
@@ -193,9 +198,8 @@ CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... python ./scripts/deploy_worke
 
 ### حالة البناء الحالية
 
-- تم إطلاق بنائين جديدين بعد آخر إصلاحات.
-- رقم بناء Android preview: `27ba7766-8b32-4009-95fe-76b4690d8e0c`
-- رقم بناء iOS simulator: `f00bce55-ca1f-47ba-96c5-c23e0cd7fdb3`
+- تم تحويل مسار GitHub Actions إلى بناء محلي مباشر داخل العاملات بدلاً من EAS.
+- بناؤا EAS السابقان استُخدما فقط لتشخيص الأعطال الأصلية، ولم يعودا مسار البناء المعتمد في GitHub Actions.
 
 ### ملاحظات مهمة
 
