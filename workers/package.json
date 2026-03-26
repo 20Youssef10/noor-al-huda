@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node ./node_modules/esbuild/bin/esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/worker.mjs",
+    "build": "node ./scripts/build.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "node ./node_modules/esbuild/bin/esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/worker.mjs && node --test test/**/*.test.mjs"
+    "test": "node ./scripts/build.mjs && node --test test/**/*.test.mjs"
   },
   "dependencies": {
     "adhan": "^4.4.3",

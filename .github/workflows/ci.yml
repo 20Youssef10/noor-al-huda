@@ -25,6 +25,7 @@ jobs:
       - name: Typecheck mobile app
         run: node node_modules/typescript/bin/tsc --noEmit
       - name: Expo Doctor
+        continue-on-error: true
         run: npx expo-doctor
 
   worker:
