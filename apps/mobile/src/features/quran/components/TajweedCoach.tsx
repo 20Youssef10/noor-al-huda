@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { Audio } from 'expo-av';
+import { AudioModule, RecordingPresets, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -34,8 +34,8 @@ const analysisSchema = z.object({
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export function TajweedCoach({ surah, ayah }: { surah: number; ayah: number }) {
-  const recordingRef = useRef<Audio.Recording | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(recorder);
   const [history, setHistory] = useState<Array<{ recordedAt: string; score: number }>>([]);
   const progress = useSharedValue(0);
 
@@ -91,22 +91,22 @@ export function TajweedCoach({ surah, ayah }: { surah: number; ayah: number }) {
   }, [result]);
 
   async function startRecording() {
-    const permission = await Audio.requestPermissionsAsync();
+    const permission = await AudioModule.requestRecordingPermissionsAsync();
     if (permission.status !== 'granted') return;
-    const recording = new Audio.Recording();
-    await recording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-    await recording.startAsync();
-    recordingRef.current = recording;
-    setIsRecording(true);
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      interruptionMode: 'doNotMix',
+      allowsRecording: true,
+      shouldPlayInBackground: false,
+      shouldRouteThroughEarpiece: false,
+    });
+    await recorder.prepareToRecordAsync();
+    recorder.record();
   }
 
   async function stopRecording() {
-    const recording = recordingRef.current;
-    if (!recording) return;
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    recordingRef.current = null;
-    setIsRecording(false);
+    await recorder.stop();
+    const uri = recorder.uri;
     if (uri) {
       mutation.mutate(uri);
     }
@@ -139,8 +139,8 @@ export function TajweedCoach({ surah, ayah }: { surah: number; ayah: number }) {
       </View>
       <View style={styles.actions}>
         <PrimaryButton
-          label={isRecording ? ar.tajweed.stop : ar.tajweed.start}
-          onPress={() => void (isRecording ? stopRecording() : startRecording())}
+          label={recorderState.isRecording ? ar.tajweed.stop : ar.tajweed.start}
+          onPress={() => void (recorderState.isRecording ? stopRecording() : startRecording())}
           tone="emerald"
           disabled={mutation.isPending}
         />

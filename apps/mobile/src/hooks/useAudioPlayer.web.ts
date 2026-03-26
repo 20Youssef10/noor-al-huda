@@ -1,57 +1,51 @@
-import { Audio } from 'expo-av';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAudioPlayer as useExpoAudioPlayer, setAudioModeAsync } from 'expo-audio';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export function useAudioPlayer() {
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const player = useExpoAudioPlayer(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
-
-  const unload = useCallback(async () => {
-    if (!soundRef.current) return;
-    await soundRef.current.unloadAsync();
-    soundRef.current.setOnPlaybackStatusUpdate(null);
-    soundRef.current = null;
-    setIsPlaying(false);
-    setCurrentUrl(null);
-  }, []);
+  const isPlaying = !player.paused && player.playing;
 
   const play = useCallback(async (url: string) => {
     setIsLoading(true);
     try {
-      if (currentUrl === url && soundRef.current) {
-        await soundRef.current.playAsync();
-        setIsPlaying(true);
-        return;
-      }
-      await unload();
-      const { sound } = await Audio.Sound.createAsync({ uri: url }, { shouldPlay: true });
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.isLoaded) return;
-        setIsPlaying(status.isPlaying);
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        interruptionMode: 'doNotMix',
+        allowsRecording: false,
+        shouldPlayInBackground: true,
+        shouldRouteThroughEarpiece: false,
       });
-      soundRef.current = sound;
+      if (currentUrl !== url) {
+        player.replace({ uri: url });
+      }
       setCurrentUrl(url);
-      setIsPlaying(true);
+      player.play();
     } finally {
       setIsLoading(false);
     }
-  }, [currentUrl, unload]);
+  }, [currentUrl, player]);
 
   const toggle = useCallback(async () => {
-    if (!soundRef.current) return;
-    const status = await soundRef.current.getStatusAsync();
-    if (!status.isLoaded) return;
-    if (status.isPlaying) {
-      await soundRef.current.pauseAsync();
-      setIsPlaying(false);
+    if (player.playing && !player.paused) {
+      player.pause();
     } else {
-      await soundRef.current.playAsync();
-      setIsPlaying(true);
+      player.play();
     }
-  }, []);
+  }, [player]);
 
-  useEffect(() => () => { void unload(); }, [unload]);
+  const stop = useCallback(async () => {
+    player.pause();
+    player.seekTo(0);
+    setCurrentUrl(null);
+  }, [player]);
 
-  return { currentUrl, isLoading, isPlaying, play, stop: unload, toggle };
+  useEffect(() => {
+    return () => {
+      player.remove();
+    };
+  }, [player]);
+
+  return { currentUrl, isLoading, isPlaying, play, stop, toggle };
 }

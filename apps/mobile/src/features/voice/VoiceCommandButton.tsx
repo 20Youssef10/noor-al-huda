@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Audio } from 'expo-av';
+import { AudioModule, RecordingPresets, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
 import * as Speech from 'expo-speech';
 import { useRouter } from 'expo-router';
 import TrackPlayer from 'react-native-track-player';
@@ -18,23 +18,28 @@ const voiceSchema = z.object({
 
 export function VoiceCommandButton() {
   const router = useRouter();
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(recorder);
   const [transcript, setTranscript] = useState('');
 
   async function startRecording() {
-    const permission = await Audio.requestPermissionsAsync();
+    const permission = await AudioModule.requestRecordingPermissionsAsync();
     if (permission.status !== 'granted') return;
-    const instance = new Audio.Recording();
-    await instance.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-    await instance.startAsync();
-    setRecording(instance);
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      interruptionMode: 'doNotMix',
+      allowsRecording: true,
+      shouldPlayInBackground: false,
+      shouldRouteThroughEarpiece: false,
+    });
+    await recorder.prepareToRecordAsync();
+    recorder.record({ forDuration: 8 });
   }
 
   async function stopRecording() {
-    if (!recording) return;
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    setRecording(null);
+    if (!recorderState.isRecording) return;
+    await recorder.stop();
+    const uri = recorder.uri;
     if (!uri) return;
     const blob = await (await fetch(uri)).blob();
     const form = new FormData();
@@ -74,9 +79,9 @@ export function VoiceCommandButton() {
         accessibilityLabel="زر الأوامر الصوتية"
         onLongPress={() => void startRecording()}
         onPressOut={() => void stopRecording()}
-        style={[styles.button, recording ? styles.buttonActive : null]}
+        style={[styles.button, recorderState.isRecording ? styles.buttonActive : null]}
       >
-        <Text style={styles.buttonText}>{recording ? '... استمع' : '🎤'}</Text>
+        <Text style={styles.buttonText}>{recorderState.isRecording ? '... استمع' : '🎤'}</Text>
       </Pressable>
       {transcript ? <Text style={styles.transcript}>{transcript}</Text> : null}
     </View>

@@ -81,6 +81,14 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-font',
     'expo-sqlite',
+    [
+      'expo-audio',
+      {
+        microphonePermission: 'نحتاج الميكروفون لتسجيل التلاوة والأوامر الصوتية.',
+        enableBackgroundPlayback: true,
+        enableBackgroundRecording: false
+      }
+    ],
     'expo-web-browser',
     'expo-localization',
     'expo-apple-authentication',

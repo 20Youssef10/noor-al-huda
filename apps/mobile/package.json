@@ -27,8 +27,9 @@
     "dayjs": "^1.11.20",
     "expo": "~55.0.8",
     "expo-apple-authentication": "~55.0.9",
+    "expo-asset": "^55.0.10",
+    "expo-audio": "^55.0.9",
     "expo-auth-session": "~55.0.9",
-    "expo-av": "^16.0.8",
     "expo-build-properties": "~55.0.10",
     "expo-camera": "^55.0.11",
     "expo-constants": "~55.0.9",
@@ -83,7 +84,6 @@
     "doctor": {
       "reactNativeDirectoryCheck": {
         "exclude": [
-          "expo-av",
           "react-native-track-player"
         ]
       }
