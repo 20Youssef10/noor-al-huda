@@ -61,7 +61,9 @@ jobs:
 
       - name: Build Android debug APK
         working-directory: apps/mobile/android
-        run: chmod +x ./gradlew && ./gradlew assembleDebug --no-daemon
+        env:
+          NODE_ENV: production
+        run: chmod +x ./gradlew && ./gradlew assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
 
       - name: Upload Android APK artifact
         uses: actions/upload-artifact@v4
@@ -71,7 +73,7 @@ jobs:
           if-no-files-found: error
 
   ios:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.target == 'ios' || inputs.target == 'both' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.target == 'ios' || inputs.target == 'both') }}
     runs-on: macos-15
     defaults:
       run:
