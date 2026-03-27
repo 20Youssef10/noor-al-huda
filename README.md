@@ -84,7 +84,7 @@ This repository includes two workflows:
 
 `direct-build.yml` does the following:
 
-- On every push to `main`: builds Android directly with `expo prebuild` + `./gradlew assembleDebug` and uploads a debug APK artifact
+- On every push to `main`: builds an installable Android ARM release APK with `expo prebuild` + `./gradlew assembleRelease` and uploads it as an artifact
 - On manual dispatch: can also target iOS or both platforms
 
 No Expo/EAS token is required for the direct build workflow.
@@ -187,7 +187,7 @@ CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... python ./scripts/deploy_worke
 
 مسار `direct-build.yml` يقوم بالتالي:
 
-- عند كل push إلى `main`: تنفيذ بناء Android مباشرة عبر `expo prebuild` ثم `./gradlew assembleDebug` ورفع ملف APK كـ artifact
+- عند كل push إلى `main`: تنفيذ بناء Android ARM قابل للتثبيت عبر `expo prebuild` ثم `./gradlew assembleRelease` ورفع ملف APK كـ artifact
 - وعند التشغيل اليدوي: يمكن استهداف iOS أو كلا المنصتين عند الحاجة
 
 لا يحتاج هذا المسار إلى `EXPO_TOKEN`.
