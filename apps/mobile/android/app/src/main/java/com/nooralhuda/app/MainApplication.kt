@@ -13,7 +13,6 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ExpoReactHostFactory
-import com.nooralhuda.app.widget.WidgetBridgePackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -23,7 +22,7 @@ class MainApplication : Application(), ReactApplication {
       packageList =
         PackageList(this).packages.apply {
           // Packages that cannot be autolinked yet can be added manually here, for example:
-          add(WidgetBridgePackage())
+          // add(MyReactNativePackage())
         }
     )
   }

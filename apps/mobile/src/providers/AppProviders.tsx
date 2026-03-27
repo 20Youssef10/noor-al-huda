@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
 import * as SystemUI from 'expo-system-ui';
 import { type PropsWithChildren, useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -20,7 +19,6 @@ import {
 import { registerForPushNotificationsAsync } from '../lib/notifications';
 import { initDatabaseAsync } from '../lib/sqlite';
 import { theme } from '../lib/theme';
-import { setupTrackPlayer } from '../features/player/setupTrackPlayer';
 import { serializeBookmarks, useAppStore } from '../store/app-store';
 
 export function AppProviders({ children }: PropsWithChildren) {
@@ -40,9 +38,6 @@ export function AppProviders({ children }: PropsWithChildren) {
     void SystemUI.setBackgroundColorAsync(theme.colors.background);
     void initDatabaseAsync();
     void registerForPushNotificationsAsync();
-    if (Platform.OS !== 'web') {
-      void setupTrackPlayer();
-    }
   }, []);
 
   return (

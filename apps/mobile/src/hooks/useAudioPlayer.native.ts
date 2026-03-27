@@ -1,52 +1,51 @@
-import { useCallback, useMemo, useState } from 'react';
-import TrackPlayer, { Capability, Event, State, useActiveTrack, usePlaybackState, useTrackPlayerEvents, type AddTrack } from 'react-native-track-player';
-
-function toTrack(url: string): AddTrack {
-  return {
-    id: url,
-    url,
-    title: 'نور الهدى',
-    artist: 'Noor Al Huda',
-  };
-}
+import { useAudioPlayer as useExpoAudioPlayer, setAudioModeAsync } from 'expo-audio';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export function useAudioPlayer() {
+  const player = useExpoAudioPlayer(null);
   const [isLoading, setIsLoading] = useState(false);
-  const activeTrack = useActiveTrack();
-  const playbackState = usePlaybackState();
-
-  useTrackPlayerEvents([Event.PlaybackError], () => {
-    setIsLoading(false);
-  });
-
-  const currentUrl = useMemo(() => (typeof activeTrack?.url === 'string' ? activeTrack.url : null), [activeTrack?.url]);
-  const isPlaying = playbackState.state === State.Playing;
+  const [currentUrl, setCurrentUrl] = useState<string | null>(null);
+  const isPlaying = !player.paused && player.playing;
 
   const play = useCallback(async (url: string) => {
     setIsLoading(true);
     try {
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        interruptionMode: 'doNotMix',
+        allowsRecording: false,
+        shouldPlayInBackground: true,
+        shouldRouteThroughEarpiece: false,
+      });
       if (currentUrl !== url) {
-        await TrackPlayer.reset();
-        await TrackPlayer.add(toTrack(url));
+        player.replace({ uri: url });
       }
-      await TrackPlayer.play();
+      setCurrentUrl(url);
+      player.play();
     } finally {
       setIsLoading(false);
     }
-  }, [currentUrl]);
-
-  const stop = useCallback(async () => {
-    await TrackPlayer.stop();
-    await TrackPlayer.reset();
-  }, []);
+  }, [currentUrl, player]);
 
   const toggle = useCallback(async () => {
-    if (playbackState.state === State.Playing) {
-      await TrackPlayer.pause();
+    if (player.playing && !player.paused) {
+      player.pause();
     } else {
-      await TrackPlayer.play();
+      player.play();
     }
-  }, [playbackState.state]);
+  }, [player]);
+
+  const stop = useCallback(async () => {
+    player.pause();
+    player.seekTo(0);
+    setCurrentUrl(null);
+  }, [player]);
+
+  useEffect(() => {
+    return () => {
+      player.remove();
+    };
+  }, [player]);
 
   return {
     currentUrl,
