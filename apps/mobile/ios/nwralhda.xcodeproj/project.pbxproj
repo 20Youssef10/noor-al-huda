@@ -11,12 +11,7 @@
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
-		A10B1C2D3E4F500100000001 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10B1C2D3E4F500100000011 /* WidgetBridge.swift */; };
-		A10B1C2D3E4F500100000002 /* WidgetBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = A10B1C2D3E4F500100000012 /* WidgetBridge.m */; };
-		A10B1C2D3E4F500100000003 /* NoorAlHudaPlaybackAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10B1C2D3E4F500100000013 /* NoorAlHudaPlaybackAttributes.swift */; };
-		A10B1C2D3E4F500100000004 /* LiveActivitiesModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10B1C2D3E4F500100000014 /* LiveActivitiesModule.swift */; };
-		A10B1C2D3E4F500100000005 /* LiveActivitiesModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A10B1C2D3E4F500100000015 /* LiveActivitiesModule.m */; };
-		3C2A2C01C7594B2196D95A30 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 94B678F9AFF643919190EE54 /* GoogleService-Info.plist */; };
+		3BC58BD3BEC4458CA75960E5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 74906585880643A7BD631D76 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,13 +22,8 @@
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = nwralhda/AppDelegate.swift; sourceTree = "<group>"; };
-		A10B1C2D3E4F500100000011 /* WidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetBridge.swift; path = nwralhda/WidgetBridge.swift; sourceTree = "<group>"; };
-		A10B1C2D3E4F500100000012 /* WidgetBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = WidgetBridge.m; path = nwralhda/WidgetBridge.m; sourceTree = "<group>"; };
-		A10B1C2D3E4F500100000013 /* NoorAlHudaPlaybackAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NoorAlHudaPlaybackAttributes.swift; path = nwralhda/NoorAlHudaPlaybackAttributes.swift; sourceTree = "<group>"; };
-		A10B1C2D3E4F500100000014 /* LiveActivitiesModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveActivitiesModule.swift; path = nwralhda/LiveActivitiesModule.swift; sourceTree = "<group>"; };
-		A10B1C2D3E4F500100000015 /* LiveActivitiesModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = LiveActivitiesModule.m; path = nwralhda/LiveActivitiesModule.m; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* nwralhda-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nwralhda-Bridging-Header.h"; path = "nwralhda/nwralhda-Bridging-Header.h"; sourceTree = "<group>"; };
-		94B678F9AFF643919190EE54 /* GoogleService-Info.plist */ = {isa = PBXFileReference; name = "GoogleService-Info.plist"; path = "nwralhda/GoogleService-Info.plist"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = text.plist.xml; explicitFileType = undefined; includeInIndex = 0; };
+		74906585880643A7BD631D76 /* GoogleService-Info.plist */ = {isa = PBXFileReference; name = "GoogleService-Info.plist"; path = "nwralhda/GoogleService-Info.plist"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = text.plist.xml; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,17 +41,12 @@
 			isa = PBXGroup;
 			children = (
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
-				A10B1C2D3E4F500100000011 /* WidgetBridge.swift */,
-				A10B1C2D3E4F500100000012 /* WidgetBridge.m */,
-				A10B1C2D3E4F500100000013 /* NoorAlHudaPlaybackAttributes.swift */,
-				A10B1C2D3E4F500100000014 /* LiveActivitiesModule.swift */,
-				A10B1C2D3E4F500100000015 /* LiveActivitiesModule.m */,
 				F11748442D0722820044C1D9 /* nwralhda-Bridging-Header.h */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				94B678F9AFF643919190EE54 /* GoogleService-Info.plist */,
+				74906585880643A7BD631D76 /* GoogleService-Info.plist */,
 			);
 			name = nwralhda;
 			sourceTree = "<group>";
@@ -124,7 +109,6 @@
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				3F40319D6C38436EAA4E4043 /* [Expo Dev Launcher] Strip Local Network Keys for Release */,
 			);
 			buildRules = (
 			);
@@ -174,7 +158,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				3C2A2C01C7594B2196D95A30 /* GoogleService-Info.plist in Resources */,
+				3BC58BD3BEC4458CA75960E5 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -242,54 +226,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-nwralhda/Pods-nwralhda-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		3F40319D6C38436EAA4E4043 /* [Expo Dev Launcher] Strip Local Network Keys for Release */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			name = "[Expo Dev Launcher] Strip Local Network Keys for Release";
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			shellPath = /bin/sh;
-			shellScript = "# Strip dev-launcher-specific local network permission keys from non-Debug builds
-# This only removes _expo._tcp Bonjour services and the dev-launcher usage description.
-# Other Bonjour services and custom descriptions are preserved for production use.
-
-if [ \"$CONFIGURATION\" != \"Debug\" ]; then
-  PLIST_PATH=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"
-  if [ -f \"$PLIST_PATH\" ]; then
-    # Check if NSBonjourServices exists
-    if /usr/libexec/PlistBuddy -c \"Print :NSBonjourServices\" \"$PLIST_PATH\" >/dev/null 2>&1; then
-      # Get the count of services
-      COUNT=$(/usr/libexec/PlistBuddy -c \"Print :NSBonjourServices\" \"$PLIST_PATH\" 2>/dev/null | grep \"^    \" | wc -l | tr -d ' ')
-
-      # Remove _expo._tcp
-      for ((i=COUNT-1; i>=0; i--)); do
-        SERVICE=$(/usr/libexec/PlistBuddy -c \"Print :NSBonjourServices:$i\" \"$PLIST_PATH\" 2>/dev/null || echo \"\")
-        if echo \"$SERVICE\" | grep -q \"_expo._tcp\"; then
-          /usr/libexec/PlistBuddy -c \"Delete :NSBonjourServices:$i\" \"$PLIST_PATH\" 2>/dev/null || true
-        fi
-      done
-
-      # If the array is now empty, remove it entirely
-      REMAINING=$(/usr/libexec/PlistBuddy -c \"Print :NSBonjourServices\" \"$PLIST_PATH\" 2>/dev/null | grep \"^    \" | wc -l | tr -d ' ')
-      if [ \"$REMAINING\" -eq \"0\" ]; then
-        /usr/libexec/PlistBuddy -c \"Delete :NSBonjourServices\" \"$PLIST_PATH\" 2>/dev/null || true
-      fi
-    fi
-
-    # Only delete the description if it matches the dev-launcher default text
-    DESC=$(/usr/libexec/PlistBuddy -c \"Print :NSLocalNetworkUsageDescription\" \"$PLIST_PATH\" 2>/dev/null || echo \"\")
-    if echo \"$DESC\" | grep -q \"Expo Dev Launcher\"; then
-      /usr/libexec/PlistBuddy -c \"Delete :NSLocalNetworkUsageDescription\" \"$PLIST_PATH\" 2>/dev/null || true
-    fi
-  fi
-fi
-";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -298,11 +234,6 @@ fi
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				A10B1C2D3E4F500100000001 /* WidgetBridge.swift in Sources */,
-				A10B1C2D3E4F500100000002 /* WidgetBridge.m in Sources */,
-				A10B1C2D3E4F500100000003 /* NoorAlHudaPlaybackAttributes.swift in Sources */,
-				A10B1C2D3E4F500100000004 /* LiveActivitiesModule.swift in Sources */,
-				A10B1C2D3E4F500100000005 /* LiveActivitiesModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

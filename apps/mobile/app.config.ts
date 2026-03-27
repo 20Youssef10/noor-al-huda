@@ -100,8 +100,8 @@ const config: ExpoConfig = {
           compileSdkVersion: 36,
           targetSdkVersion: 36,
           minSdkVersion: 24,
-          enableProguardInReleaseBuilds: true,
-          enableShrinkResourcesInReleaseBuilds: true
+          enableProguardInReleaseBuilds: false,
+          enableShrinkResourcesInReleaseBuilds: false
         },
         ios: {
           deploymentTarget: '15.1'
