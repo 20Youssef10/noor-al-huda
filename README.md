@@ -84,8 +84,8 @@ This repository includes two workflows:
 
 `direct-build.yml` does the following:
 
-- Android: runs `expo prebuild`, then `./gradlew assembleDebug`, and uploads a debug APK artifact
-- iOS: runs `expo prebuild`, `pod install`, then `xcodebuild` for a simulator app, and uploads a zipped `.app` artifact
+- On every push to `main`: builds Android directly with `expo prebuild` + `./gradlew assembleDebug` and uploads a debug APK artifact
+- On manual dispatch: can also target iOS or both platforms
 
 No Expo/EAS token is required for the direct build workflow.
 
@@ -97,6 +97,7 @@ Optional GitHub secrets if you later automate worker deployment:
 ### Current build state
 
 - Repository workflow builds now target direct native build steps instead of EAS cloud build.
+- A successful Android direct build artifact is now produced by GitHub Actions on the alternate build repo.
 - Older EAS builds were only used for debugging the native failures and are no longer the GitHub Actions path.
 
 ### Known caveats
@@ -186,8 +187,8 @@ CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... python ./scripts/deploy_worke
 
 مسار `direct-build.yml` يقوم بالتالي:
 
-- Android: تنفيذ `expo prebuild` ثم `./gradlew assembleDebug` ورفع ملف APK كـ artifact
-- iOS: تنفيذ `expo prebuild` ثم `pod install` ثم `xcodebuild` للمحاكي ورفع ملف `.app` مضغوط كـ artifact
+- عند كل push إلى `main`: تنفيذ بناء Android مباشرة عبر `expo prebuild` ثم `./gradlew assembleDebug` ورفع ملف APK كـ artifact
+- وعند التشغيل اليدوي: يمكن استهداف iOS أو كلا المنصتين عند الحاجة
 
 لا يحتاج هذا المسار إلى `EXPO_TOKEN`.
 
@@ -199,6 +200,7 @@ CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... python ./scripts/deploy_worke
 ### حالة البناء الحالية
 
 - تم تحويل مسار GitHub Actions إلى بناء محلي مباشر داخل العاملات بدلاً من EAS.
+- يوجد الآن بناء Android ناجح عبر GitHub Actions في المستودع البديل المخصص للتشغيل.
 - بناؤا EAS السابقان استُخدما فقط لتشخيص الأعطال الأصلية، ولم يعودا مسار البناء المعتمد في GitHub Actions.
 
 ### ملاحظات مهمة
