@@ -1,27 +1,25 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
+import { CompanionPanel } from '@/components/companion-panel';
 import { FeatureCard } from '@/components/feature-card';
 import { DuaGenerator } from '@/components/dua-generator';
 import { HalalPanel } from '@/components/halal-panel';
 import { PrayerPanel } from '@/components/prayer-panel';
 import { SemanticSearch } from '@/components/semantic-search';
+import { SiteShell } from '@/components/site-shell';
 import { apiJson } from '@/lib/api';
 
-type DailyPayload = {
-  ayah: { text: string; reference: string; surahName: string };
-  hadith: { title: string; text: string; source: string };
-};
-
-type RadioPayload = Array<{ id: string; name: string; country: string; description: string }>;
+import type { DailyPayload, RadioItem } from '@/lib/types';
 
 export default async function HomePage() {
   const [daily, radios] = await Promise.all([
     apiJson<DailyPayload>('/api/daily-content').catch(() => null),
-    apiJson<RadioPayload>('/api/radios').catch(() => []),
+    apiJson<RadioItem[]>('/api/radios').catch(() => []),
   ]);
 
   return (
-    <main className="page-shell">
+    <SiteShell>
       <header className="hero">
         <div className="hero-copy">
           <Image src="/logo-mark.svg" alt="نور الهدى" className="hero-logo" width={88} height={88} priority />
@@ -32,7 +30,7 @@ export default async function HomePage() {
           </p>
           <div className="hero-actions">
             <a className="primary-button" href="#interactive">ابدأ التفاعل الآن</a>
-            <a className="ghost-button" href="https://noor-al-huda-api.shinzero.workers.dev/api/health" target="_blank" rel="noreferrer">حالة الواجهة الخلفية</a>
+            <Link className="ghost-button" href="/features">تصفح كل الصفحات</Link>
           </div>
         </div>
         <div className="hero-panel">
@@ -97,6 +95,14 @@ export default async function HomePage() {
 
       <section className="section-block">
         <div className="section-heading">
+          <p className="eyebrow">Companion</p>
+          <h2>تأمل اليوم</h2>
+        </div>
+        <CompanionPanel />
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
           <p className="eyebrow">إذاعات</p>
           <h2>محطات مختارة</h2>
         </div>
@@ -116,6 +122,6 @@ export default async function HomePage() {
           اخترت Vercel لهذا المشروع لأنه الأنسب لـ Next.js من حيث سرعة النشر، SSR، وتحسين تجربة المطور.
         </p>
       </section>
-    </main>
+    </SiteShell>
   );
 }
