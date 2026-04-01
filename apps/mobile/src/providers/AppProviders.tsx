@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
 import * as SystemUI from 'expo-system-ui';
 import { type PropsWithChildren, useEffect, useState } from 'react';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -16,7 +17,6 @@ import {
   syncUserSettings,
   pushBookmarksSnapshot,
 } from '../lib/firebase';
-import { registerForPushNotificationsAsync } from '../lib/notifications';
 import { initDatabaseAsync } from '../lib/sqlite';
 import { theme } from '../lib/theme';
 import { serializeBookmarks, useAppStore } from '../store/app-store';
@@ -33,12 +33,37 @@ export function AppProviders({ children }: PropsWithChildren) {
         },
       })
   );
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    void SystemUI.setBackgroundColorAsync(theme.colors.background);
-    void initDatabaseAsync();
-    void registerForPushNotificationsAsync();
+    let mounted = true;
+
+    void (async () => {
+      try {
+        await SystemUI.setBackgroundColorAsync(theme.colors.background);
+        await initDatabaseAsync();
+      } catch {
+        useAppStore.getState().setSyncState('error', 'تعذر تهيئة التخزين المحلي بشكل كامل.');
+      }
+      if (mounted) {
+        setIsReady(true);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
+
+  if (!isReady) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <View style={{ flex: 1, backgroundColor: theme.colors.background }} />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

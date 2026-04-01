@@ -98,7 +98,7 @@ export default function SurahDetailScreen() {
                     if (audioPlayer.currentUrl === surahQuery.data?.audioUrl) {
                       void audioPlayer.toggle();
                     } else if (surahQuery.data?.audioUrl) {
-                      void audioPlayer.play(surahQuery.data.audioUrl);
+                      void audioPlayer.play(surahQuery.data.audioUrl, surahQuery.data.surah.name);
                     }
                   }}
                 />

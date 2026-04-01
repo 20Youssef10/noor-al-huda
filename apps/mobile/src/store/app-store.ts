@@ -12,6 +12,8 @@ type AppState = {
   bookmarks: Bookmark[];
   completedAzkar: Record<string, number>;
   activeRadioId: string | null;
+  currentAudioUrl: string | null;
+  audioLabel: string | null;
   lastReadSurahId: number | null;
   syncStatus: SyncStatus;
   syncMessage: string | null;
@@ -19,6 +21,7 @@ type AppState = {
   setCalculationMethod: (calculationMethod: string) => void;
   setNotificationsEnabled: (notificationsEnabled: boolean) => void;
   setActiveRadioId: (activeRadioId: string | null) => void;
+  setCurrentAudio: (currentAudioUrl: string | null, audioLabel?: string | null) => void;
   setLastReadSurahId: (surahId: number) => void;
   replaceSettings: (settings: UserSettings) => void;
   replaceBookmarks: (bookmarks: Bookmark[]) => void;
@@ -54,6 +57,8 @@ export const useAppStore = create<AppState>()(
       bookmarks: [],
       completedAzkar: {},
       activeRadioId: null,
+      currentAudioUrl: null,
+      audioLabel: null,
       lastReadSurahId: 1,
       syncStatus: 'idle',
       syncMessage: null,
@@ -70,6 +75,7 @@ export const useAppStore = create<AppState>()(
           settings: { ...state.settings, notificationsEnabled },
         })),
       setActiveRadioId: (activeRadioId) => set({ activeRadioId }),
+      setCurrentAudio: (currentAudioUrl, audioLabel = null) => set({ currentAudioUrl, audioLabel }),
       setLastReadSurahId: (lastReadSurahId) => set({ lastReadSurahId }),
       replaceSettings: (settings) => set({ settings }),
       replaceBookmarks: (bookmarks) => set({ bookmarks }),

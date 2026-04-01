@@ -39,7 +39,7 @@ export default function RadioScreen() {
                 if (currentUrl === activeStation.streamUrl) {
                   void toggle();
                 } else {
-                  void play(activeStation.streamUrl);
+                  void play(activeStation.streamUrl, activeStation.name);
                 }
               }}
             />
@@ -66,7 +66,7 @@ export default function RadioScreen() {
                 label={isLoading && station.id === activeRadioId ? '...' : 'تشغيل'}
                 onPress={() => {
                   setActiveRadioId(station.id);
-                  void play(station.streamUrl);
+                  void play(station.streamUrl, station.name);
                 }}
               />
             </View>

@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 
@@ -28,7 +29,8 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
     return null;
   }
 
-  const token = await Notifications.getExpoPushTokenAsync();
+  const projectId = (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId;
+  const token = await Notifications.getExpoPushTokenAsync(projectId ? { projectId } : undefined);
   return token.data;
 }
 

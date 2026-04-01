@@ -3,10 +3,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AudioModule, RecordingPresets, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
 import * as Speech from 'expo-speech';
 import { useRouter } from 'expo-router';
-import TrackPlayer from 'react-native-track-player';
 import { z } from 'zod';
 
 import { apiBaseUrl } from '../../lib/api';
+import { stopSharedAudio } from '../../lib/audio';
 import { theme } from '../../lib/theme';
 
 const voiceSchema = z.object({
@@ -62,7 +62,7 @@ export function VoiceCommandButton() {
         router.push('/(tabs)/radio');
         break;
       case 'STOP_AUDIO':
-        await TrackPlayer.pause();
+        await stopSharedAudio();
         break;
       case 'OPEN_AZKAR':
         router.push('/(tabs)/azkar');

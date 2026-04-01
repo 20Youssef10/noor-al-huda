@@ -28,12 +28,10 @@ import {
   useGoogleSignIn,
 } from '../../src/features/auth/service';
 import { fetchPrayerTimes } from '../../src/features/prayer/service';
-import { VoiceCommandButton } from '../../src/features/voice/VoiceCommandButton';
 import { formatFullDate, formatMinutes, prayerLabels } from '../../src/lib/formatting';
 import { syncUserSettings } from '../../src/lib/firebase';
 import { theme } from '../../src/lib/theme';
 import { useSeasonalTheme } from '../../src/shared/hooks/useSeasonalTheme';
-import { updatePrayerWidget } from '../../src/features/widgets/WidgetBridge';
 import { storage } from '../../src/lib/mmkv';
 import { useAppStore } from '../../src/store/app-store';
 
@@ -102,7 +100,6 @@ export default function HomeScreen() {
     }
 
     storage.set('today_prayer_times', JSON.stringify(prayerQuery.data.prayers));
-    void updatePrayerWidget(prayerQuery.data);
   }, [prayerQuery.data]);
 
   return (
@@ -157,7 +154,9 @@ export default function HomeScreen() {
           <Link href="/features" asChild>
             <GhostButton label="مركز الميزات" onPress={() => undefined} />
           </Link>
-          <VoiceCommandButton />
+          <Link href="/features/voice" asChild>
+            <GhostButton label="الأوامر الصوتية" onPress={() => undefined} />
+          </Link>
         </View>
       </SurfaceCard>
 

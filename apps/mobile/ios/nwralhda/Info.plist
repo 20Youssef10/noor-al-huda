@@ -39,12 +39,6 @@
           <string>com.googleusercontent.apps.1024474386791-s5uf8704i6gkaufb07u2u9non124i5j6</string>
         </array>
       </dict>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>exp+noor-al-huda</string>
-        </array>
-      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>
@@ -79,8 +73,6 @@
     <string>نحتاج الميكروفون لتسجيل التلاوة والأوامر الصوتية.</string>
     <key>NSMotionUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your device motion</string>
-    <key>NSSupportsLiveActivities</key>
-    <true/>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
