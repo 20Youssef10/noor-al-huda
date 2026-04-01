@@ -37,6 +37,17 @@ const searchSchema = z.object({
   limit: z.coerce.number().min(1).max(20).default(10),
 });
 
+const duaResultSchema = z.object({
+  dua: z.string(),
+  sources: z.array(z.string()),
+});
+
+const companionResultSchema = z.object({
+  reflection: z.string(),
+  focus: z.string(),
+  focus_type: z.string(),
+});
+
 export const aiRoutes = new Hono<{ Bindings: Env }>();
 
 aiRoutes.post('/dua/generate', async (c) => {
@@ -69,7 +80,7 @@ aiRoutes.post('/dua/generate', async (c) => {
   try {
     const raw = response.response?.trim() ?? '{}';
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    return c.json(JSON.parse(jsonMatch?.[0] ?? '{}'));
+    return c.json(duaResultSchema.parse(JSON.parse(jsonMatch?.[0] ?? '{}')));
   } catch {
     return c.json(fallback);
   }
@@ -77,7 +88,7 @@ aiRoutes.post('/dua/generate', async (c) => {
 
 aiRoutes.post('/companion/daily', async (c) => {
   const { history } = companionSchema.parse(await c.req.json());
-  const cacheKey = `companion:daily:${new Date().toISOString().split('T')[0]}`;
+  const cacheKey = `companion:v2:daily:${new Date().toISOString().split('T')[0]}`;
   const cached = await readCache(c.env, 'PRAYER_CACHE', cacheKey);
   if (cached) {
     return c.json(cached);
@@ -109,7 +120,7 @@ aiRoutes.post('/companion/daily', async (c) => {
 
   let payload = fallback;
   try {
-    payload = JSON.parse(result.response?.match(/\{[\s\S]*\}/)?.[0] ?? '{}');
+    payload = companionResultSchema.parse(JSON.parse(result.response?.match(/\{[\s\S]*\}/)?.[0] ?? '{}'));
   } catch {
     payload = fallback;
   }

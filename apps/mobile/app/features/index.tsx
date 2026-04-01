@@ -1,13 +1,14 @@
 import { Link } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
-import { Page, SectionHeader, SurfaceCard } from '../../src/components/ui';
+import { Page, SectionHeader } from '../../src/components/ui';
 import { theme } from '../../src/lib/theme';
 
 const cards = [
   { href: '/features/tajweed', title: 'مدرب التجويد', subtitle: 'تحليل تلاوة بالذكاء الاصطناعي' },
   { href: '/features/search', title: 'البحث الدلالي', subtitle: 'اكتشف الآيات بالمعنى' },
   { href: '/features/dua', title: 'مولد الدعاء', subtitle: 'دعاء شخصي مع مصادر' },
+  { href: '/features/companion', title: 'الرفيق اليومي', subtitle: 'تأمل روحاني مخصص لهذا اليوم' },
   { href: '/features/qibla', title: 'قبلة معززة', subtitle: 'بوصلة AR واتجاه مباشر' },
   { href: '/features/halal', title: 'ماسح الحلال', subtitle: 'تحقق من مكونات المنتجات' },
   { href: '/features/tracker', title: 'متابعة العبادة', subtitle: 'تتبع الصيام والورد والصدقة' },
@@ -26,10 +27,10 @@ export default function FeaturesHubScreen() {
       <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
         {cards.map((card) => (
           <Link href={card.href as never} key={card.href} asChild>
-            <SurfaceCard accent="blue">
+            <Pressable style={styles.card}>
               <Text style={styles.title}>{card.title}</Text>
               <Text style={styles.subtitle}>{card.subtitle}</Text>
-            </SurfaceCard>
+            </Pressable>
           </Link>
         ))}
       </ScrollView>
@@ -40,6 +41,15 @@ export default function FeaturesHubScreen() {
 const styles = StyleSheet.create({
   grid: {
     gap: 12,
+  },
+  card: {
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(79,142,247,0.22)',
+    backgroundColor: theme.colors.surface,
+    gap: 12,
+    ...theme.shadow.card,
   },
   title: {
     color: theme.colors.goldLight,

@@ -62,6 +62,39 @@ export default function SettingsScreen() {
           <GhostButton label="فتح مركز الميزات المتقدمة" onPress={() => undefined} />
         </Link>
       </SurfaceCard>
+
+      <SurfaceCard accent="blue">
+        <SectionHeader title="روابط سريعة" subtitle="اختصارات مباشرة للميزات الموسعة" />
+        <View style={styles.quickLinks}>
+          <Link href="/features/search" asChild>
+            <GhostButton label="البحث الدلالي" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/dua" asChild>
+            <GhostButton label="مولد الدعاء" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/companion" asChild>
+            <GhostButton label="الرفيق اليومي" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/qibla" asChild>
+            <GhostButton label="القبلة" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/halal" asChild>
+            <GhostButton label="ماسح الحلال" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/tracker" asChild>
+            <GhostButton label="متابعة العبادة" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/khatm" asChild>
+            <GhostButton label="الختمة الجماعية" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/kids" asChild>
+            <GhostButton label="وضع الأطفال" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/voice" asChild>
+            <GhostButton label="الأوامر الصوتية" onPress={() => undefined} />
+          </Link>
+        </View>
+      </SurfaceCard>
     </Page>
   );
 }
@@ -73,5 +106,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 23,
     textAlign: 'right',
+  },
+  quickLinks: {
+    flexDirection: 'row',
+    gap: 10,
+    flexWrap: 'wrap',
   },
 });
