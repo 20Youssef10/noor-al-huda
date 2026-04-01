@@ -5,6 +5,8 @@ import {
   getAuth,
   sendEmailVerification,
   sendPasswordResetEmail,
+  sendSignInLinkToEmail,
+  signInAnonymously,
   signOut,
 } from 'firebase/auth';
 import { deleteDoc, doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
@@ -23,13 +25,23 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const email = `integration+${Date.now()}@example.invalid`;
 const password = 'NoorAlHuda123!';
+const magicEmail = `magic+${Date.now()}@example.invalid`;
+
+const actionCodeSettings = {
+  url: 'https://noor-al-huda-260326.firebaseapp.com/auth/email-link',
+  handleCodeInApp: true,
+};
 
 try {
+  const guestCredential = await signInAnonymously(auth);
+  await deleteUser(guestCredential.user);
+
   const credential = await createUserWithEmailAndPassword(auth, email, password);
   const { user } = credential;
 
   await sendEmailVerification(user);
   await sendPasswordResetEmail(auth, email);
+  await sendSignInLinkToEmail(auth, magicEmail, actionCodeSettings);
 
   const userRef = doc(db, 'users', user.uid);
   const bookmarkRef = doc(db, 'users', user.uid, 'bookmarks', '2:255');
@@ -62,8 +74,10 @@ try {
       createdUser: user.uid,
       settingsWrite: userSnap.exists(),
       bookmarkWrite: bookmarkSnap.exists(),
+      guestLoginWorked: true,
       emailVerificationRequested: true,
       passwordResetRequested: true,
+      passwordlessEmailRequested: true,
     })
   );
 

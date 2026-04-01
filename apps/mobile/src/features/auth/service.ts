@@ -1,8 +1,5 @@
-import { makeRedirectUri } from 'expo-auth-session';
 import { useEffect, useMemo, useState } from 'react';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
-import { Platform } from 'react-native';
+import { GoogleSignin, isErrorWithCode, statusCodes } from '@react-native-google-signin/google-signin';
 import { type User } from 'firebase/auth';
 
 import { mapFirebaseAuthError, mapGoogleAuthError } from './error-messages';
@@ -23,8 +20,6 @@ import {
   sendVerificationEmailToCurrentUser,
   subscribeToAuth,
 } from '../../lib/firebase';
-
-WebBrowser.maybeCompleteAuthSession();
 
 export function useAuthUser() {
   const [user, setUser] = useState<User | null>(null);
@@ -58,138 +53,108 @@ export function useGoogleSignIn() {
   const [info, setInfo] = useState<string | null>(null);
   const [stage, setStage] = useState<'idle' | 'opening' | 'verifying' | 'done'>('idle');
 
-  const androidUnsupported = Platform.OS === 'android';
-  const enabled = hasGoogleAuthConfig && !androidUnsupported;
-  const googleConfig = useMemo(
-    () =>
-      androidUnsupported
-        ? {}
-        : {
-            webClientId: googleAuthConfig.webClientId,
-            androidClientId: googleAuthConfig.androidClientId,
-            iosClientId: googleAuthConfig.iosClientId,
-            selectAccount: true,
-            scopes: ['profile', 'email'],
-          },
-    [androidUnsupported]
-  );
-
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest(
-    googleConfig,
-    androidUnsupported
-      ? undefined
-      : {
-          native: makeRedirectUri({ native: 'nooralhuda:/oauthredirect' }),
-        }
+  const enabled = hasGoogleAuthConfig;
+  const config = useMemo(
+    () => ({
+      webClientId: googleAuthConfig.webClientId,
+      iosClientId: googleAuthConfig.iosClientId,
+      offlineAccess: false,
+      profileImageSize: 120,
+      scopes: ['profile', 'email'],
+    }),
+    []
   );
 
   useEffect(() => {
-    void WebBrowser.warmUpAsync();
-
-    return () => {
-      void WebBrowser.coolDownAsync();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (androidUnsupported) {
-      setInfo('تسجيل الدخول عبر Google معطّل مؤقتاً على Android في إصدار الإنتاج الحالي حتى ننتقل إلى تكامل Google Sign-In الأصلي الآمن.');
-    }
-  }, [androidUnsupported]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function handleResponse() {
-      if (!response) {
-        return;
-      }
-
-      if (response.type !== 'success') {
-        setLoading(false);
-        setStage('idle');
-        if (response.type === 'cancel' || response.type === 'dismiss') {
-          setInfo('تم إلغاء تسجيل الدخول قبل الاكتمال.');
-          setError(null);
-          return;
-        }
-
-        if (response?.type === 'error') {
-          setError(mapGoogleAuthError(response.error?.message));
-        }
-        return;
-      }
-
-      const idToken = response.params.id_token;
-      if (!idToken) {
-        setError('لم يتم استلام Google ID token.');
-        setLoading(false);
-        setStage('idle');
-        return;
-      }
-
-      setLoading(true);
-      setStage('verifying');
-      setError(null);
-      setInfo('جارٍ ربط حساب Google مع Firebase...');
-
-      try {
-        await loginWithGoogleIdToken(idToken);
-        if (!cancelled) {
-          setInfo('تم ربط حساب Google بنجاح.');
-          setStage('done');
-        }
-      } catch (nextError) {
-        if (!cancelled) {
-          setError(mapGoogleAuthError(nextError instanceof Error ? nextError.message : undefined));
-          setStage('idle');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+    if (!enabled) {
+      setInfo('إعداد Google Sign-In غير مكتمل حالياً لهذا المشروع.');
+      return;
     }
 
-    void handleResponse();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [response]);
+    GoogleSignin.configure(config);
+    setInfo('Google Sign-In جاهز على هذا الجهاز.');
+  }, [config, enabled]);
 
   return {
     enabled,
     loading,
     error,
-  info,
-  stage,
-  ready: Boolean(request),
-    canStart: enabled && Boolean(request) && !loading,
+    info,
+    stage,
+    ready: enabled,
+    canStart: enabled && !loading,
     signIn: async () => {
       if (!enabled) {
-        throw new Error(
-          androidUnsupported
-            ? 'Google Sign-In معطّل حالياً على Android في هذا الإصدار الإنتاجي.'
-            : 'Google sign-in is not configured yet.'
-        );
-      }
-
-      if (!request) {
-        throw new Error('Google sign-in is not ready yet.');
+        throw new Error('Google Sign-In غير مهيأ بعد لهذا التطبيق.');
       }
 
       setError(null);
-      setInfo('سيتم فتح نافذة Google الآمنة الآن.');
+      setInfo('جارٍ فتح تسجيل الدخول عبر Google...');
       setStage('opening');
       setLoading(true);
-      const result = await promptAsync({ showInRecents: true });
-      if (result.type === 'cancel' || result.type === 'dismiss') {
-        setLoading(false);
+
+      try {
+        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+        const response = await GoogleSignin.signIn() as unknown;
+        const googleUser = extractGoogleUser(response);
+
+        if (isCancelledGoogleResponse(response)) {
+          setInfo('تم إلغاء تسجيل الدخول قبل الاكتمال.');
+          setStage('idle');
+          return;
+        }
+
+        if (!googleUser) {
+          throw new Error('تعذر إكمال تسجيل الدخول عبر Google.');
+        }
+
+        const idToken = googleUser.idToken;
+        if (!idToken) {
+          throw new Error('لم يتم استلام Google ID token من خدمة Google.');
+        }
+
+        setStage('verifying');
+        setInfo('جارٍ ربط حساب Google مع Firebase...');
+        await loginWithGoogleIdToken(idToken);
+        setInfo('تم ربط حساب Google بنجاح.');
+        setStage('done');
+      } catch (nextError) {
+        if (isErrorWithCode(nextError)) {
+          switch (nextError.code) {
+            case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+              setError('خدمات Google Play غير متوفرة أو تحتاج إلى تحديث.');
+              break;
+            case statusCodes.IN_PROGRESS:
+              setError('توجد محاولة تسجيل دخول جارية بالفعل.');
+              break;
+            case statusCodes.SIGN_IN_CANCELLED:
+              setInfo('تم إلغاء تسجيل الدخول قبل الاكتمال.');
+              break;
+            default:
+              setError(mapGoogleAuthError(nextError.message));
+              break;
+          }
+        } else {
+          setError(mapGoogleAuthError(nextError instanceof Error ? nextError.message : undefined));
+        }
         setStage('idle');
+      } finally {
+        setLoading(false);
       }
     },
   };
+}
+
+async function logoutEverywhere() {
+  try {
+    if (GoogleSignin.hasPreviousSignIn()) {
+      await GoogleSignin.signOut();
+    }
+  } catch {
+    // Ignore native Google logout failures and continue Firebase sign-out.
+  }
+
+  await logoutUser();
 }
 
 export const authActions = {
@@ -198,7 +163,7 @@ export const authActions = {
   continueAsGuest,
   loginWithEmail,
   loginWithGoogleIdToken,
-  logoutUser,
+  logoutUser: logoutEverywhere,
   registerWithEmail,
   sendPasswordResetLink,
   sendPasswordlessSignInLink,
@@ -206,3 +171,32 @@ export const authActions = {
 };
 
 export { mapFirebaseAuthError, mapGoogleAuthError };
+
+function isCancelledGoogleResponse(response: unknown) {
+  return Boolean(
+    response &&
+      typeof response === 'object' &&
+      'type' in response &&
+      (response as { type?: unknown }).type === 'cancelled'
+  );
+}
+
+function extractGoogleUser(response: unknown): { idToken: string | null } | null {
+  if (!response || typeof response !== 'object') {
+    return null;
+  }
+
+  if ('type' in response) {
+    const typed = response as { type?: unknown; data?: unknown };
+    if (typed.type === 'success' && typed.data && typeof typed.data === 'object' && 'idToken' in typed.data) {
+      return typed.data as { idToken: string | null };
+    }
+    return null;
+  }
+
+  if ('idToken' in response) {
+    return response as { idToken: string | null };
+  }
+
+  return null;
+}

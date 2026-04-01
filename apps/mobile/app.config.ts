@@ -82,6 +82,12 @@ const config: ExpoConfig = {
     'expo-font',
     'expo-sqlite',
     [
+      '@react-native-google-signin/google-signin',
+      {
+        iosUrlScheme: 'com.googleusercontent.apps.1024474386791-s5uf8704i6gkaufb07u2u9non124i5j6'
+      }
+    ],
+    [
       'expo-audio',
       {
         microphonePermission: 'نحتاج الميكروفون لتسجيل التلاوة والأوامر الصوتية.',

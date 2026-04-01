@@ -27,6 +27,7 @@ import {
   useAuthUser,
   useGoogleSignIn,
 } from '../../src/features/auth/service';
+import { AuthWindow } from '../../src/features/auth/components/AuthWindow';
 import { fetchPrayerTimes } from '../../src/features/prayer/service';
 import { formatFullDate, formatMinutes, prayerLabels } from '../../src/lib/formatting';
 import { syncUserSettings } from '../../src/lib/firebase';
@@ -215,18 +216,49 @@ export default function HomeScreen() {
             <Text style={styles.providerChip}>Guest</Text>
           </View>
         ) : null}
-        {!user && googleSignIn.enabled ? (
-          <PrimaryButton
-            label={
-              googleSignIn.stage === 'opening'
-                ? 'جارٍ فتح Google...'
-                : googleSignIn.stage === 'verifying'
-                  ? 'جارٍ إتمام الربط...'
-                  : 'متابعة باستخدام Google'
+        {!user ? (
+          <AuthWindow
+            authLoading={authLoading}
+            email={email}
+            name={name}
+            password={password}
+            onChangeEmail={setEmail}
+            onChangeName={setName}
+            onChangePassword={setPassword}
+            onRegister={() =>
+              void handleAction(
+                async () => {
+                  await authActions.registerWithEmail(email, password, name);
+                  await authActions.sendVerificationEmailToCurrentUser();
+                },
+                'تم إنشاء الحساب وأُرسلت رسالة التحقق إلى بريدك الإلكتروني.'
+              )
             }
-            tone="emerald"
-            disabled={!googleSignIn.canStart}
-            onPress={() => {
+            onLogin={() =>
+              void handleAction(
+                () => authActions.loginWithEmail(email, password),
+                'تم تسجيل الدخول.'
+              )
+            }
+            onGuest={() =>
+              void handleAction(
+                () => authActions.continueAsGuest(),
+                'تم فتح جلسة ضيف بنجاح.'
+              )
+            }
+            onResetPassword={() =>
+              void handleAction(
+                () => authActions.sendPasswordResetLink(email),
+                'تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني.'
+              )
+            }
+            onMagicLink={() =>
+              void handleAction(
+                () => authActions.sendPasswordlessSignInLink(email),
+                'تم إرسال رابط الدخول إلى بريدك الإلكتروني. افتحه على نفس الجهاز لإكمال الدخول.'
+              )
+            }
+            onGoogle={() => {
               void googleSignIn.signIn().catch((error) => {
                 Alert.alert(
                   'تعذر تسجيل الدخول',
@@ -234,91 +266,12 @@ export default function HomeScreen() {
                 );
               });
             }}
+            googleEnabled={googleSignIn.enabled}
+            googleLoading={googleSignIn.loading || googleSignIn.stage === 'opening' || googleSignIn.stage === 'verifying'}
+            googleInfo={googleSignIn.info}
+            googleError={googleSignIn.error}
+            googleReady={googleSignIn.ready}
           />
-        ) : null}
-        {!user && googleSignIn.info ? (
-          <Text style={styles.helperText}>{googleSignIn.info}</Text>
-        ) : null}
-        {!user && googleSignIn.error ? (
-          <Text style={styles.errorText}>{googleSignIn.error}</Text>
-        ) : null}
-        {!user ? (
-          <View style={styles.formStack}>
-            <TextField value={name} onChangeText={setName} placeholder="الاسم (اختياري)" />
-            <TextField value={email} onChangeText={setEmail} placeholder="البريد الإلكتروني" />
-            <TextField
-              value={password}
-              onChangeText={setPassword}
-              placeholder="كلمة المرور"
-              secureTextEntry
-            />
-            <View style={styles.actionRow}>
-              <PrimaryButton
-                label={authLoading ? '...' : 'إنشاء حساب'}
-                onPress={() =>
-                  handleAction(
-                    async () => {
-                      await authActions.registerWithEmail(email, password, name);
-                      await authActions.sendVerificationEmailToCurrentUser();
-                    },
-                    'تم إنشاء الحساب وأُرسلت رسالة التحقق إلى بريدك الإلكتروني.'
-                  )
-                }
-                disabled={authLoading}
-              />
-              <GhostButton
-                label="تسجيل الدخول"
-                onPress={() =>
-                  handleAction(
-                    () => authActions.loginWithEmail(email, password),
-                    'تم تسجيل الدخول.'
-                  )
-                }
-                disabled={authLoading}
-              />
-              <GhostButton
-                label="الدخول كضيف"
-                onPress={() =>
-                  handleAction(
-                    () => authActions.continueAsGuest(),
-                    'تم فتح جلسة ضيف بنجاح.'
-                  )
-                }
-                disabled={authLoading}
-              />
-            </View>
-            <GhostButton
-              label="إرسال رابط إعادة تعيين كلمة المرور"
-              onPress={() =>
-                handleAction(
-                  () => authActions.sendPasswordResetLink(email),
-                  'تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني.'
-                )
-              }
-              disabled={authLoading || !email.trim()}
-            />
-            <GhostButton
-              label="إرسال رابط دخول بدون كلمة مرور"
-              onPress={() =>
-                handleAction(
-                  () => authActions.sendPasswordlessSignInLink(email),
-                  'تم إرسال رابط الدخول إلى بريدك الإلكتروني. افتحه على نفس الجهاز لإكمال الدخول.'
-                )
-              }
-              disabled={authLoading || !email.trim()}
-            />
-            {!googleSignIn.enabled ? (
-              <Text style={styles.helperText}>
-                {googleSignIn.info ?? 'Google Sign-In غير متاح حالياً على هذا الإصدار.'}
-              </Text>
-            ) : null}
-            <Text style={styles.helperText}>
-              يمكن أيضاً الدخول برابط بريدي بدون كلمة مرور. سيُكمل التطبيق الدخول تلقائياً عند فتح الرابط من البريد.
-            </Text>
-            {googleSignIn.enabled && !googleSignIn.ready ? (
-              <Text style={styles.helperText}>يتم تجهيز جلسة Google الآمنة لهذا الجهاز...</Text>
-            ) : null}
-          </View>
         ) : (
           <View style={styles.formStack}>
             {needsVerification ? (
