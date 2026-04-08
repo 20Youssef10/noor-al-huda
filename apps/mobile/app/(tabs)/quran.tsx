@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EmptyState, Page, SectionHeader, SurfaceCard, TextField } from '../../src/components/ui';
 import { fetchSurahList } from '../../src/features/quran/service';
@@ -44,8 +44,10 @@ export default function QuranScreen() {
       {lastReadSurahId ? (
         <SurfaceCard accent="emerald">
           <SectionHeader title="استئناف القراءة" subtitle={`آخر سورة مفتوحة: رقم ${lastReadSurahId}`} />
-          <Link href={`/quran/${lastReadSurahId}`} style={styles.resumeLink}>
-            فتح السورة ومتابعة القراءة
+          <Link href={`/quran/${lastReadSurahId}`} asChild>
+            <Pressable style={styles.resumeButton}>
+              <Text style={styles.resumeLink}>فتح السورة ومتابعة القراءة</Text>
+            </Pressable>
           </Link>
         </SurfaceCard>
       ) : null}
@@ -57,7 +59,13 @@ export default function QuranScreen() {
       ) : filtered.length ? (
         filtered.map((surah) => (
           <Link href={`/quran/${surah.id}`} key={surah.id} asChild>
-            <SurfaceCard accent={surah.id === lastReadSurahId ? 'emerald' : 'gold'}>
+            <Pressable
+              accessibilityLabel={`فتح سورة ${surah.name}`}
+              style={[
+                styles.card,
+                surah.id === lastReadSurahId ? styles.cardEmerald : styles.cardGold,
+              ]}
+            >
               <View style={styles.surahRow}>
                 <View style={styles.surahMeta}>
                   <Text style={styles.surahName}>{surah.name}</Text>
@@ -72,7 +80,7 @@ export default function QuranScreen() {
               <Text style={styles.surahDetails}>
                 {surah.versesCount} آية · {surah.revelation === 'Meccan' ? 'مكية' : 'مدنية'}
               </Text>
-            </SurfaceCard>
+            </Pressable>
           </Link>
         ))
       ) : (
@@ -88,6 +96,24 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.bodyBold,
     fontSize: 14,
     textAlign: 'right',
+  },
+  resumeButton: {
+    borderRadius: 16,
+    paddingVertical: 8,
+  },
+  card: {
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    backgroundColor: theme.colors.surface,
+    gap: 12,
+    ...theme.shadow.card,
+  },
+  cardGold: {
+    borderColor: 'rgba(201,168,76,0.22)',
+  },
+  cardEmerald: {
+    borderColor: 'rgba(42,157,92,0.22)',
   },
   surahRow: {
     flexDirection: 'row-reverse',
