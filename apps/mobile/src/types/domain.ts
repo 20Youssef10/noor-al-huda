@@ -50,6 +50,13 @@ export interface SurahDetail {
   audioUrl?: string;
 }
 
+export interface RamadanInfo {
+  dayNumber: number;
+  fastingMessage: string;
+  iftarTime: string;
+  suhoorTip: string;
+}
+
 export interface QuranTranslationCollection {
   id: string;
   label: string;

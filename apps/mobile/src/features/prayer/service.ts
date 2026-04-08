@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { jsonRequest } from '../../lib/api';
 import { formatClock } from '../../lib/formatting';
-import { type AppLocation, type PrayerName, type PrayerTimesData } from '../../types/domain';
+import { type AppLocation, type PrayerName, type PrayerTimesData, type RamadanInfo } from '../../types/domain';
 
 const prayerSchema = z.object({
   locationLabel: z.string(),
@@ -41,6 +41,20 @@ function resolveCalculationMethod(method: string) {
   }
 }
 
+export function computePrayerDateMap(date: Date, location: AppLocation, method: string) {
+  const coordinates = new Coordinates(location.latitude, location.longitude);
+  const params = resolveCalculationMethod(method);
+  const prayerTimes = new PrayerTimes(coordinates, date, params);
+  return {
+    fajr: prayerTimes.fajr,
+    sunrise: prayerTimes.sunrise,
+    dhuhr: prayerTimes.dhuhr,
+    asr: prayerTimes.asr,
+    maghrib: prayerTimes.maghrib,
+    isha: prayerTimes.isha,
+  };
+}
+
 function computeNextPrayer(
   entries: Array<[PrayerName, Date]>,
   location: AppLocation,
@@ -69,8 +83,7 @@ export function buildLocalPrayerData(
   method: string
 ): PrayerTimesData {
   const coordinates = new Coordinates(location.latitude, location.longitude);
-  const params = resolveCalculationMethod(method);
-  const prayerTimes = new PrayerTimes(coordinates, date, params);
+  const prayerTimes = computePrayerDateMap(date, location, method);
 
   const entries: Array<[PrayerName, Date]> = [
     ['fajr', prayerTimes.fajr],
@@ -100,4 +113,19 @@ export async function fetchPrayerTimes(location: AppLocation, method: string) {
   } catch {
     return buildLocalPrayerData(new Date(), location, method);
   }
+}
+
+export function buildRamadanInfo(prayerTimes: PrayerTimesData): RamadanInfo {
+  const parts = new Intl.DateTimeFormat('en-TN-u-ca-islamic', {
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(new Date());
+  const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const dayNumber = Number(lookup.day ?? 1);
+  return {
+    dayNumber,
+    fastingMessage: `اليوم ${dayNumber} من رمضان، حافظ على ورد ثابت بعد الفجر وقبل التراويح.`,
+    iftarTime: prayerTimes.prayers.maghrib,
+    suhoorTip: `اختم سحورك قبل ${prayerTimes.prayers.fajr} وابدأ يومك بدعاء نية صادقة.`,
+  };
 }

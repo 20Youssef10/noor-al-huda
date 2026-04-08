@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Page, SectionHeader, SurfaceCard, GhostButton } from '../../src/components/ui';
-import { fetchAzkarCatalog, fetchAzkarCollection } from '../../src/features/azkar/service';
+import { fetchAzkarCatalog, fetchAzkarCategory, fetchAzkarCollection } from '../../src/features/azkar/service';
 import { theme } from '../../src/lib/theme';
 import { useAppStore } from '../../src/store/app-store';
 import { type AzkarCollection } from '../../src/types/domain';
@@ -18,14 +18,19 @@ export default function AzkarScreen() {
   const [activeTab, setActiveTab] = useState<AzkarCollection>('morning');
   const [search, setSearch] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
+  const [selectedCatalogId, setSelectedCatalogId] = useState<number | null>(null);
+  const [selectedCatalogTitle, setSelectedCatalogTitle] = useState('');
   const completedAzkar = useAppStore((state) => state.completedAzkar);
   const incrementAzkar = useAppStore((state) => state.incrementAzkar);
 
   const catalogQuery = useQuery({ queryKey: ['azkar-catalog'], queryFn: fetchAzkarCatalog });
 
   const azkarQuery = useQuery({
-    queryKey: ['azkar', activeTab],
-    queryFn: () => fetchAzkarCollection(activeTab),
+    queryKey: ['azkar', activeTab, selectedCatalogId],
+    queryFn: () =>
+      selectedCatalogId
+        ? fetchAzkarCategory(selectedCatalogId, selectedCatalogTitle || 'مجموعة أذكار')
+        : fetchAzkarCollection(activeTab),
   });
 
   const filteredEntries = useMemo(() => {
@@ -42,7 +47,15 @@ export default function AzkarScreen() {
       <SectionHeader title="الأذكار" subtitle="حصن المسلم مع عدّاد تقدّم محفوظ محلياً" />
       <View style={styles.tabsRow}>
         {tabs.map((tab) => (
-          <GhostButton key={tab.key} label={tab.label} onPress={() => setActiveTab(tab.key)} />
+          <GhostButton
+            key={tab.key}
+            label={tab.label}
+            onPress={() => {
+              setActiveTab(tab.key);
+              setSelectedCatalogId(null);
+              setSelectedCatalogTitle('');
+            }}
+          />
         ))}
       </View>
 
@@ -58,7 +71,14 @@ export default function AzkarScreen() {
       {catalogQuery.data ? (
         <View style={styles.catalogRow}>
           {catalogQuery.data.slice(0, 10).map((item) => (
-            <GhostButton key={item.id} label={item.title} onPress={() => undefined} />
+            <GhostButton
+              key={item.id}
+              label={item.title}
+              onPress={() => {
+                setSelectedCatalogId(item.id);
+                setSelectedCatalogTitle(item.title);
+              }}
+            />
           ))}
         </View>
       ) : null}

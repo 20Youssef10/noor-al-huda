@@ -19,6 +19,7 @@ import {
 } from '../lib/firebase';
 import { canSync } from '../features/privacy/PrivacyManager';
 import { initStorageAsync } from '../lib/mmkv';
+import { configureNotificationCategoriesAsync } from '../lib/notifications';
 import { initDatabaseAsync } from '../lib/sqlite';
 import { theme } from '../lib/theme';
 import { serializeBookmarks, useAppStore } from '../store/app-store';
@@ -45,6 +46,7 @@ export function AppProviders({ children }: PropsWithChildren) {
         await SystemUI.setBackgroundColorAsync(theme.colors.background);
         await initStorageAsync();
         await initDatabaseAsync();
+        await configureNotificationCategoriesAsync();
       } catch {
         useAppStore.getState().setSyncState('error', 'تعذر تهيئة التخزين المحلي بشكل كامل.');
       }

@@ -28,7 +28,7 @@ import {
   useGoogleSignIn,
 } from '../../src/features/auth/service';
 import { AuthWindow } from '../../src/features/auth/components/AuthWindow';
-import { fetchPrayerTimes } from '../../src/features/prayer/service';
+import { buildRamadanInfo, fetchPrayerTimes } from '../../src/features/prayer/service';
 import { formatFullDate, formatMinutes, prayerLabels } from '../../src/lib/formatting';
 import { syncUserSettings } from '../../src/lib/firebase';
 import { theme } from '../../src/lib/theme';
@@ -94,6 +94,7 @@ export default function HomeScreen() {
 
   const recentBookmarks = bookmarks.slice(0, 2);
   const seasonalTheme = useSeasonalTheme(prayerQuery.data);
+  const ramadanInfo = prayerQuery.data ? buildRamadanInfo(prayerQuery.data) : null;
 
   useEffect(() => {
     if (!prayerQuery.data) {
@@ -190,11 +191,12 @@ export default function HomeScreen() {
       {seasonalTheme.id === 'ramadan' ? (
         <SurfaceCard accent="emerald">
           <SectionHeader title="برنامج رمضان" subtitle="بطاقة يومية خاصة بالشهر المبارك" />
-          <Text style={styles.bodyText}>اجعل لك ورداً ثابتاً بعد الفجر، وراجع أذكار الصباح والمساء، وجدول تذكيرات الصلاة الكاملة من صفحة الصلاة.</Text>
+          <Text style={styles.bodyText}>{ramadanInfo?.fastingMessage}</Text>
           <View style={styles.metricRow}>
             <MetricTile label="الهدف اليومي" value="جزء / 20 صفحة" hint="ابدأ بعد الفجر أو قبل التراويح" />
-            <MetricTile label="تذكير الإفطار" value={prayerQuery.data?.prayers.maghrib ?? '--:--'} hint="موعد المغرب اليوم" />
+            <MetricTile label="تذكير الإفطار" value={ramadanInfo?.iftarTime ?? '--:--'} hint="موعد المغرب اليوم" />
           </View>
+          <Text style={styles.bodyText}>{ramadanInfo?.suhoorTip}</Text>
           <Link href="/(tabs)/prayer" asChild>
             <GhostButton label="افتح الصلاة والتذكيرات" onPress={() => undefined} />
           </Link>

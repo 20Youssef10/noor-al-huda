@@ -10,6 +10,7 @@ const azkarSchema = z.array(
     text: z.string(),
     count: z.number(),
     virtue: z.string(),
+    collectionTitle: z.string().optional(),
   })
 );
 
@@ -49,10 +50,21 @@ export async function fetchAzkarCatalog(): Promise<AzkarCatalogItem[]> {
 }
 
 export async function fetchAzkarCollection(collection: AzkarCollection): Promise<AzkarEntry[]> {
-  const cached = await getCachedContent<AzkarEntry[]>('azkar', collection);
+  const catalogTitle =
+    collection === 'morning'
+      ? 'أذكار الصباح'
+      : collection === 'evening'
+        ? 'أذكار المساء'
+        : 'الأذكار بعد الصلاة';
+
+  return fetchAzkarCategory(categoryMap[collection], catalogTitle, collection === 'after-prayer' ? 'ذكر بعد الصلاة من حصن المسلم.' : 'ذكر حي من حصن المسلم.');
+}
+
+export async function fetchAzkarCategory(categoryId: number, collectionTitle: string, virtueFallback = 'ذكر من حصن المسلم.') {
+  const cacheKey = `category:${categoryId}`;
+  const cached = await getCachedContent<AzkarEntry[]>('azkar', cacheKey);
 
   try {
-    const categoryId = categoryMap[collection];
     const response = await fetch(`https://www.hisnmuslim.com/api/ar/${categoryId}.json`);
     if (!response.ok) {
       throw new Error(`azkar-failed-${response.status}`);
@@ -65,28 +77,18 @@ export async function fetchAzkarCollection(collection: AzkarCollection): Promise
         id: String(item.ID),
         text: item.ARABIC_TEXT,
         count: item.REPEAT,
-        virtue:
-          collection === 'morning'
-            ? 'ورد الصباح من حصن المسلم.'
-            : collection === 'evening'
-              ? 'ورد المساء من حصن المسلم.'
-              : 'ذكر بعد الصلاة من حصن المسلم.',
-        collectionTitle:
-          collection === 'morning'
-            ? 'أذكار الصباح'
-            : collection === 'evening'
-              ? 'أذكار المساء'
-              : 'الأذكار بعد الصلاة',
+        virtue: virtueFallback,
+        collectionTitle,
       }))
     );
-    await putCachedContent('azkar', collection, remote);
+    await putCachedContent('azkar', cacheKey, remote);
     return remote;
   } catch {
     if (cached) {
       return cached;
     }
-    const fallback = fallbackAzkar[collection];
-    await putCachedContent('azkar', collection, fallback);
+    const fallback = Object.values(fallbackAzkar).flat().map((item) => ({ ...item, collectionTitle }));
+    await putCachedContent('azkar', cacheKey, fallback);
     return fallback;
   }
 }
