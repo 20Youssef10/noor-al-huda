@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { AudioModule, RecordingPresets, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Circle, Svg } from 'react-native-svg';
 import { z } from 'zod';
@@ -62,6 +62,9 @@ export function TajweedCoach({ surah, ayah }: { surah: number; ayah: number }) {
       progress.value = withTiming(result.score / 100, { duration: 700 });
       const entry = { recordedAt: new Date().toISOString(), score: result.score };
       setHistory((current) => [entry, ...current].slice(0, 7));
+    },
+    onError: (error) => {
+      Alert.alert('تعذر تحليل التلاوة', error instanceof Error ? error.message : 'حدث خطأ أثناء رفع أو تحليل التسجيل.');
     },
   });
 

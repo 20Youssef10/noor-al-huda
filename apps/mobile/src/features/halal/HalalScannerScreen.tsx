@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useQueryClient } from '@tanstack/react-query';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
 
 import { jsonRequest } from '../../lib/api';
@@ -31,6 +31,8 @@ export function HalalScannerScreen() {
       const result = await jsonRequest(`/api/halal/scan?barcode=${barcode}`, verdictSchema);
       setPayload(result);
       await putCachedContent('halal_scans', barcode, { ...result, scanned_at: new Date().toISOString() });
+    } catch (error) {
+      Alert.alert('تعذر التحليل', error instanceof Error ? error.message : 'حدث خطأ أثناء تحليل المنتج.');
     } finally {
       setTimeout(() => setBusy(false), 1500);
     }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
-import { addDoc, arrayUnion, collection, doc, getDocs, increment, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore';
+import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, increment, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore';
 
 import { db, getCurrentUser } from '../../../lib/firebase';
 import { storage } from '../../../lib/mmkv';
@@ -17,6 +17,12 @@ function getDeviceIdentity() {
 
 function buildInviteCode() {
   return `NOOR${Math.floor(10 + Math.random() * 89)}`;
+}
+
+function assignPagesForMember(index: number, membersCount: number) {
+  const perMember = Math.ceil(604 / Math.max(1, membersCount));
+  const start = index * perMember + 1;
+  return Array.from({ length: perMember }, (_, offset) => start + offset).filter((page) => page <= 604);
 }
 
 export function GroupKhatmScreen() {
@@ -56,7 +62,7 @@ export function GroupKhatmScreen() {
     await setDoc(doc(db, 'khatm_members', `${groupRef.id}__${identity}`), {
       user_id: identity,
       display_name: getCurrentUser()?.displayName ?? 'عضو نور الهدى',
-      assigned_pages: Array.from({ length: 604 }, (_, index) => index + 1),
+      assigned_pages: assignPagesForMember(0, 1),
       completed_pages: [],
       joined_at: serverTimestamp(),
     });
@@ -81,10 +87,11 @@ export function GroupKhatmScreen() {
       return;
     }
 
+    const existingMembersCount = Number(target.data().member_count ?? 1);
     await setDoc(doc(db, 'khatm_members', `${target.id}__${identity}`), {
       user_id: identity,
       display_name: getCurrentUser()?.displayName ?? 'عضو نور الهدى',
-      assigned_pages: Array.from({ length: 50 }, (_, index) => index + 1),
+      assigned_pages: assignPagesForMember(existingMembersCount, existingMembersCount + 1),
       completed_pages: [],
       joined_at: serverTimestamp(),
     }, { merge: true });
@@ -104,7 +111,13 @@ export function GroupKhatmScreen() {
   async function markPageDone(page: number) {
     if (!db || !joinedGroupId) return;
     const identity = getCurrentUser()?.uid ?? getDeviceIdentity();
-    await updateDoc(doc(db, 'khatm_members', `${joinedGroupId}__${identity}`), {
+    const memberRef = doc(db, 'khatm_members', `${joinedGroupId}__${identity}`);
+    const existing = (await getDoc(memberRef)).data() as { completed_pages?: number[] } | undefined;
+    if (existing?.completed_pages?.includes(page)) {
+      Alert.alert('تم الإنجاز مسبقاً', 'هذه الصفحة محسوبة بالفعل ضمن تقدمك.');
+      return;
+    }
+    await updateDoc(memberRef, {
       completed_pages: arrayUnion(page),
     });
     await updateDoc(doc(db, 'khatm_progress', joinedGroupId), {

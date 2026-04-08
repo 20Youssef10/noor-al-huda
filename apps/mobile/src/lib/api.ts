@@ -1,6 +1,8 @@
 import Constants from 'expo-constants';
 import { z } from 'zod';
 
+import { canRequestUrl } from '../features/privacy/PrivacyManager';
+
 const extra = (Constants.expoConfig?.extra ?? {}) as {
   apiBaseUrl?: string;
 };
@@ -20,7 +22,12 @@ export async function jsonRequest<T>(
   schema?: z.ZodType<T>,
   init?: RequestInit
 ): Promise<T> {
-  const response = await fetch(joinUrl(path), {
+  const url = joinUrl(path);
+  if (!canRequestUrl(url)) {
+    throw new Error('BLOCKED_IN_PRIVATE_MODE');
+  }
+
+  const response = await fetch(url, {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',

@@ -34,6 +34,18 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   return token.data;
 }
 
+export async function ensureLocalNotificationsPermissionAsync() {
+  const current = await Notifications.getPermissionsAsync();
+  let status = current.status;
+
+  if (status !== 'granted') {
+    const next = await Notifications.requestPermissionsAsync();
+    status = next.status;
+  }
+
+  return status === 'granted';
+}
+
 export async function schedulePrayerReminderAsync(prayerLabel: string, body: string, date: Date) {
   await Notifications.scheduleNotificationAsync({
     content: {

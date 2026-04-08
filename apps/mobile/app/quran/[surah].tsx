@@ -13,7 +13,8 @@ import { useAppStore } from '../../src/store/app-store';
 export default function SurahDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ surah: string }>();
-  const surahId = Number(params.surah ?? 1);
+  const parsedSurahId = Number(params.surah ?? 1);
+  const surahId = Number.isFinite(parsedSurahId) && parsedSurahId > 0 ? parsedSurahId : 1;
   const bookmarks = useAppStore((state) => state.bookmarks);
   const toggleBookmark = useAppStore((state) => state.toggleBookmark);
   const setLastReadSurahId = useAppStore((state) => state.setLastReadSurahId);

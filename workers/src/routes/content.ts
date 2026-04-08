@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { fallbackAzkar, fallbackDailyContent, fallbackRadios } from '../data/fallback';
 import { readCache, writeCache } from '../services/cache';
+import { queueBackgroundTask } from '../services/runtime';
 import { type Env } from '../types';
 
 export const contentRoutes = new Hono<{ Bindings: Env }>();
@@ -83,7 +84,7 @@ contentRoutes.get('/daily-content', async (c) => {
       },
     };
 
-    c.executionCtx.waitUntil(writeCache(c.env, 'HADITH_CACHE', cacheKey, payload, 86400));
+    queueBackgroundTask(c, writeCache(c.env, 'HADITH_CACHE', cacheKey, payload, 86400));
     return c.json(payload);
   } catch {
     await writeCache(c.env, 'HADITH_CACHE', cacheKey, fallbackDailyContent, 86400);
@@ -125,7 +126,7 @@ contentRoutes.get('/radios', async (c) => {
       throw new Error('radio_empty');
     }
 
-    c.executionCtx.waitUntil(writeCache(c.env, 'RADIO_LIST', 'radios:v2:all', payload, 3600));
+    queueBackgroundTask(c, writeCache(c.env, 'RADIO_LIST', 'radios:v2:all', payload, 3600));
     return c.json(payload);
   } catch {
     await writeCache(c.env, 'RADIO_LIST', 'radios:v2:all', fallbackRadios, 3600);
@@ -166,7 +167,7 @@ contentRoutes.get('/azkar/:collection', async (c) => {
         throw new Error('azkar_empty');
       }
 
-      c.executionCtx.waitUntil(writeCache(c.env, 'AZKAR_CACHE', cacheKey, payload, 2_592_000));
+      queueBackgroundTask(c, writeCache(c.env, 'AZKAR_CACHE', cacheKey, payload, 2_592_000));
       return c.json(payload);
     } catch {
       const payload = fallbackAzkar[collection] ?? fallbackAzkar.morning;

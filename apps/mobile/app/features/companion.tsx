@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { z } from 'zod';
 
-import { Page, SectionHeader, SurfaceCard } from '../../src/components/ui';
+import { EmptyState, GhostButton, Page, SectionHeader, SurfaceCard } from '../../src/components/ui';
 import { jsonRequest } from '../../src/lib/api';
 import { theme } from '../../src/lib/theme';
 import { useAppStore } from '../../src/store/app-store';
@@ -38,6 +38,12 @@ export default function CompanionFeatureScreen() {
       <SectionHeader title="الرفيق اليومي" subtitle="تأمل شخصي مبني على نشاطك القريب" />
       <SurfaceCard accent="emerald">
         {query.isLoading ? <ActivityIndicator color={theme.colors.goldLight} /> : null}
+        {query.isError ? (
+          <>
+            <EmptyState title="تعذر تحميل الرفيق اليومي" message="تحقق من الاتصال أو جرّب التحديث مرة أخرى." />
+            <GhostButton label="إعادة المحاولة" onPress={() => void query.refetch()} />
+          </>
+        ) : null}
         {query.data ? (
           <>
             <Text style={styles.reflection}>{query.data.reflection}</Text>

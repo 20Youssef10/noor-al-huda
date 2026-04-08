@@ -92,10 +92,7 @@ export { hasFirebaseConfig };
 
 export const googleAuthConfig = {
   webClientId: firebaseConfig?.webClientId ?? '',
-  androidClientId:
-    Platform.OS === 'android' && !__DEV__
-      ? firebaseConfig?.androidReleaseClientId ?? ''
-      : firebaseConfig?.androidDebugClientId ?? firebaseConfig?.androidReleaseClientId ?? '',
+  androidClientId: firebaseConfig?.androidDebugClientId ?? firebaseConfig?.androidReleaseClientId ?? '',
   iosClientId: firebaseConfig?.iosClientId ?? '',
 };
 

@@ -62,13 +62,14 @@ export function ARQibla({ latitude, longitude }: { latitude: number; longitude: 
     <SurfaceCard accent="blue">
       <Text style={styles.title}>بوصلة القبلة المعززة</Text>
       <View style={styles.cameraFrame}>
-        {permission?.granted ? <CameraView style={StyleSheet.absoluteFillObject} facing="back" /> : null}
+        {permission?.granted ? <CameraView style={StyleSheet.absoluteFillObject} facing="back" /> : <Text style={styles.overlayText}>اسمح للكاميرا لإظهار القبلة المعززة.</Text>}
         <Animated.View style={[styles.arrowWrapper, arrowStyle]}>
           <Svg width={140} height={140} viewBox="0 0 140 140">
             <Path d="M70 8L92 64H78V132H62V64H48L70 8Z" fill={quality === 'green' ? '#4CAF50' : quality === 'yellow' ? '#F5B942' : '#F97316'} />
           </Svg>
         </Animated.View>
       </View>
+      {query.isError ? <Text style={styles.caption}>تعذر جلب اتجاه القبلة حالياً. جرّب لاحقاً أو حدّث الموقع.</Text> : null}
       <Text style={styles.caption}>حرّك الجهاز على شكل الرقم 8 لتحسين المعايرة. الحالة: {quality === 'green' ? 'دقيقة' : quality === 'yellow' ? 'متوسطة' : 'تحتاج معايرة'}</Text>
     </SurfaceCard>
   );
@@ -78,5 +79,6 @@ const styles = StyleSheet.create({
   title: { color: theme.colors.goldLight, fontFamily: theme.fonts.display, fontSize: 24, textAlign: 'right' },
   cameraFrame: { height: 300, borderRadius: 24, overflow: 'hidden', backgroundColor: '#111' },
   arrowWrapper: { position: 'absolute', insetInlineStart: '50%', top: '50%', marginStart: -70, marginTop: -70 },
+  overlayText: { color: theme.colors.cream, fontFamily: theme.fonts.body, fontSize: 14, textAlign: 'center', marginTop: 132 },
   caption: { color: theme.colors.creamMuted, fontFamily: theme.fonts.body, fontSize: 13, textAlign: 'right' },
 });

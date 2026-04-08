@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { fallbackDailyContent } from '../data/fallback';
 import { readCache, writeCache } from '../services/cache';
 import { computeHalalVerdict } from '../services/halal';
+import { queueBackgroundTask } from '../services/runtime';
 import { computeTajweedScore } from '../services/tajweed';
 import { getSurahList } from '../services/quran';
 import { type Env } from '../types';
@@ -125,7 +126,7 @@ aiRoutes.post('/companion/daily', async (c) => {
     payload = fallback;
   }
 
-  c.executionCtx.waitUntil(writeCache(c.env, 'PRAYER_CACHE', cacheKey, payload, 86400));
+  queueBackgroundTask(c, writeCache(c.env, 'PRAYER_CACHE', cacheKey, payload, 86400));
   return c.json(payload);
 });
 
@@ -290,7 +291,7 @@ aiRoutes.post('/tajweed/analyze', async (c) => {
   const analysis = computeTajweedScore(transcribed, correctText);
 
   if (c.env.MEDIA_BUCKET) {
-    c.executionCtx.waitUntil(
+    queueBackgroundTask(c,
       c.env.MEDIA_BUCKET.put(
         `tajweed/${crypto.randomUUID()}.json`,
         JSON.stringify({ surah, ayah, transcribed, analysis, ts: Date.now() })
@@ -322,7 +323,7 @@ aiRoutes.get('/halal/scan', async (c) => {
   }
 
   const result = computeHalalVerdict(data.product.product_name ?? 'منتج', data.product.ingredients_text ?? '');
-  c.executionCtx.waitUntil(writeCache(c.env, 'QURAN_CACHE', cacheKey, result, 604800));
+  queueBackgroundTask(c, writeCache(c.env, 'QURAN_CACHE', cacheKey, result, 604800));
   return c.json(result);
 });
 

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
 
 import { ar } from '../../../shared/i18n/ar';
@@ -71,13 +71,13 @@ export function SemanticSearch() {
         scrollEnabled={false}
         renderItem={({ item }) => (
           <Link href={`/quran/${item.surah}`} asChild>
-            <View style={styles.resultCard}>
+            <Pressable style={styles.resultCard} accessibilityLabel={`افتح سورة ${item.surah_name}`}>
               <Text style={styles.resultTitle}>{item.surah_name} · {item.ayah}</Text>
               <Text style={styles.resultText}>{item.text_ar}</Text>
               <View style={styles.scoreTrack}>
                 <View style={[styles.scoreFill, { width: `${Math.min(100, Math.round(item.score * 100))}%` }]} />
               </View>
-            </View>
+            </Pressable>
           </Link>
         )}
         ListEmptyComponent={

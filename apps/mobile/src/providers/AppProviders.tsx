@@ -17,6 +17,7 @@ import {
   syncUserSettings,
   pushBookmarksSnapshot,
 } from '../lib/firebase';
+import { canSync } from '../features/privacy/PrivacyManager';
 import { initStorageAsync } from '../lib/mmkv';
 import { initDatabaseAsync } from '../lib/sqlite';
 import { theme } from '../lib/theme';
@@ -151,6 +152,11 @@ function FirestoreSyncBridge() {
 
       if (!user) {
         useAppStore.getState().setSyncState('idle', 'سجّل الدخول لتفعيل المزامنة السحابية.');
+        return;
+      }
+
+       if (!canSync()) {
+        useAppStore.getState().setSyncState('idle', 'وضع الخصوصية يمنع المزامنة السحابية حالياً.');
         return;
       }
 

@@ -8,6 +8,7 @@ import { fetchPrayerTimes } from '../../src/features/prayer/service';
 import { prayerLabels } from '../../src/lib/formatting';
 import {
   cancelScheduledNotificationsAsync,
+  ensureLocalNotificationsPermissionAsync,
   registerForPushNotificationsAsync,
   schedulePrayerReminderAsync,
 } from '../../src/lib/notifications';
@@ -56,9 +57,12 @@ export default function PrayerScreen() {
   }
 
   async function enableNotifications() {
-    const token = await registerForPushNotificationsAsync();
-    setNotificationsEnabled(Boolean(token));
-    Alert.alert('الإشعارات', token ? 'تم تفعيل الإشعارات المحلية/المرتبطة بـ Expo.' : 'لم يتم منح الإذن بعد.');
+    const granted = await ensureLocalNotificationsPermissionAsync();
+    setNotificationsEnabled(granted);
+    if (granted) {
+      void registerForPushNotificationsAsync().catch(() => null);
+    }
+    Alert.alert('الإشعارات', granted ? 'تم تفعيل الإشعارات المحلية.' : 'لم يتم منح الإذن بعد.');
   }
 
   async function scheduleNextPrayerReminder() {
@@ -67,8 +71,7 @@ export default function PrayerScreen() {
       return;
     }
 
-    const token = await registerForPushNotificationsAsync();
-    const notificationsEnabled = Boolean(token);
+    const notificationsEnabled = await ensureLocalNotificationsPermissionAsync();
     setNotificationsEnabled(notificationsEnabled);
 
     if (!notificationsEnabled) {

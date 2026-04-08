@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { AudioModule, RecordingPresets, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
 import * as Speech from 'expo-speech';
 import { useRouter } from 'expo-router';
@@ -41,13 +41,17 @@ export function VoiceCommandButton() {
     await recorder.stop();
     const uri = recorder.uri;
     if (!uri) return;
-    const blob = await (await fetch(uri)).blob();
-    const form = new FormData();
-    form.append('audio', blob, 'voice.m4a');
-    const response = await fetch(`${apiBaseUrl}/api/voice/command`, { method: 'POST', body: form });
-    const payload = voiceSchema.parse(await response.json());
-    setTranscript(payload.transcript);
-    await executeIntent(payload);
+    try {
+      const blob = await (await fetch(uri)).blob();
+      const form = new FormData();
+      form.append('audio', blob, 'voice.m4a');
+      const response = await fetch(`${apiBaseUrl}/api/voice/command`, { method: 'POST', body: form });
+      const payload = voiceSchema.parse(await response.json());
+      setTranscript(payload.transcript);
+      await executeIntent(payload);
+    } catch (error) {
+      Alert.alert('تعذر تنفيذ الأمر الصوتي', error instanceof Error ? error.message : 'حدث خطأ أثناء معالجة الصوت.');
+    }
   }
 
   async function executeIntent(intent: z.infer<typeof voiceSchema>) {

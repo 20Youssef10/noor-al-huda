@@ -1,7 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import * as SQLite from 'expo-sqlite';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
 
 import { jsonRequest } from '../../lib/api';
@@ -20,33 +20,42 @@ export function RuyaJournalScreen() {
   const [reflection, setReflection] = useState('');
 
   async function saveEntry() {
-    const db = await SQLite.openDatabaseAsync('noor-al-huda.db');
-    await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS ruya_journal (
-        id TEXT PRIMARY KEY DEFAULT (hex(randomblob(8))),
-        hijri_date TEXT NOT NULL,
-        content TEXT NOT NULL,
-        reflection TEXT,
-        mood TEXT,
-        created_at INTEGER DEFAULT (unixepoch())
+    try {
+      const db = await SQLite.openDatabaseAsync('noor-al-huda.db');
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS ruya_journal (
+          id TEXT PRIMARY KEY DEFAULT (hex(randomblob(8))),
+          hijri_date TEXT NOT NULL,
+          content TEXT NOT NULL,
+          reflection TEXT,
+          mood TEXT,
+          created_at INTEGER DEFAULT (unixepoch())
+        );
+      `);
+      const key = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, pin || '0000');
+      await db.runAsync(
+        'INSERT INTO ruya_journal (hijri_date, content, reflection, mood) VALUES (?, ?, ?, ?)',
+        new Intl.DateTimeFormat('en-TN-u-ca-islamic', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()),
+        xorHexEncode(dream, key),
+        xorHexEncode(reflection, key),
+        'neutral'
       );
-    `);
-    const key = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, pin || '0000');
-    await db.runAsync(
-      'INSERT INTO ruya_journal (hijri_date, content, reflection, mood) VALUES (?, ?, ?, ?)',
-      new Intl.DateTimeFormat('en-TN-u-ca-islamic', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()),
-      xorHexEncode(dream, key),
-      xorHexEncode(reflection, key),
-      'neutral'
-    );
+      Alert.alert('تم الحفظ', 'حُفظت الرؤيا محلياً بشكل مشفر.');
+    } catch (error) {
+      Alert.alert('تعذر الحفظ', error instanceof Error ? error.message : 'حدث خطأ أثناء الحفظ.');
+    }
   }
 
   async function requestReflection() {
-    const payload = await jsonRequest('/api/ruya/reflect', reflectionSchema, {
-      method: 'POST',
-      body: JSON.stringify({ dream }),
-    });
-    setReflection(payload.reflection);
+    try {
+      const payload = await jsonRequest('/api/ruya/reflect', reflectionSchema, {
+        method: 'POST',
+        body: JSON.stringify({ dream }),
+      });
+      setReflection(payload.reflection);
+    } catch (error) {
+      Alert.alert('تعذر تحميل التأمل', error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء التأمل.');
+    }
   }
 
   return (

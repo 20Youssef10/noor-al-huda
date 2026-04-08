@@ -1,7 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import * as FileSystemLegacy from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { Page, GhostButton, SectionHeader, SurfaceCard } from '../../src/components/ui';
 import { getPrivacyMode, setPrivacyMode, type PrivacyMode } from '../../src/features/privacy/PrivacyManager';
+import { storage } from '../../src/lib/mmkv';
 import { theme } from '../../src/lib/theme';
 import { useState } from 'react';
 
@@ -13,6 +16,30 @@ const modes: Array<{ key: PrivacyMode; title: string; body: string }> = [
 
 export default function PrivacyFeatureScreen() {
   const [mode, setMode] = useState<PrivacyMode>(getPrivacyMode());
+
+  async function exportLocalData() {
+    const payload = {
+      privacyMode: getPrivacyMode(),
+      recentSearches: storage.getString('recent_searches'),
+      streakData: storage.getString('streak_data'),
+      unlockedAchievements: storage.getString('unlocked_achievements'),
+    };
+    const baseDir = FileSystemLegacy.cacheDirectory ?? FileSystemLegacy.documentDirectory;
+    if (!baseDir) {
+      throw new Error('تعذر الوصول إلى مسار تخزين مناسب لتصدير البيانات.');
+    }
+    const path = `${baseDir}noor-al-huda-export.json`;
+    await FileSystemLegacy.writeAsStringAsync(path, JSON.stringify(payload, null, 2));
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(path);
+    }
+  }
+
+  function wipeLocalData() {
+    storage.clearAll();
+    Alert.alert('تم الحذف', 'أُزيلت جميع البيانات المحلية المحفوظة من الجهاز.');
+    setMode('full');
+  }
 
   return (
     <Page>
@@ -30,6 +57,11 @@ export default function PrivacyFeatureScreen() {
           />
         </SurfaceCard>
       ))}
+      <SurfaceCard>
+        <SectionHeader title="بياناتك المحلية" subtitle="تصدير أو حذف فوري بدون تعقيد" />
+        <GhostButton label="تصدير البيانات المحلية" onPress={() => void exportLocalData()} />
+        <GhostButton label="حذف جميع البيانات المحلية" onPress={wipeLocalData} />
+      </SurfaceCard>
     </Page>
   );
 }
