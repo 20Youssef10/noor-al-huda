@@ -72,12 +72,13 @@ export async function fetchSurahList() {
 }
 
 export async function fetchSurahDetail(surahId: number) {
-  const cached = await getCachedContent<z.infer<typeof surahDetailSchema>>('surah', String(surahId));
+  const cacheKey = `v2:${surahId}`;
+  const cached = await getCachedContent<z.infer<typeof surahDetailSchema>>('surah', cacheKey);
 
   try {
     const [surahList, versesResponse] = await Promise.all([
       fetchSurahList(),
-      fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahId}?language=en&words=false&translations=131&fields=text_uthmani,verse_key`),
+      fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahId}?language=en&words=false&translations=131&fields=text_uthmani,verse_key&per_page=300`),
     ]);
     if (!versesResponse.ok) {
       throw new Error(`quran-surah-failed-${versesResponse.status}`);
@@ -93,14 +94,14 @@ export async function fetchSurahDetail(surahId: number) {
       })),
       audioUrl: `https://server8.mp3quran.net/afs/${String(surahId).padStart(3, '0')}.mp3`,
     });
-    await putCachedContent('surah', String(surahId), remote);
+    await putCachedContent('surah', cacheKey, remote);
     return remote;
   } catch {
     if (cached) {
       return cached;
     }
     const fallback = buildFallbackSurahDetail(surahId);
-    await putCachedContent('surah', String(surahId), fallback);
+    await putCachedContent('surah', cacheKey, fallback);
     return fallback;
   }
 }

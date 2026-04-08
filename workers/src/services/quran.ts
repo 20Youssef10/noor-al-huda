@@ -47,7 +47,7 @@ export async function getSurahList(env: Env) {
 }
 
 export async function getSurahDetail(env: Env, id: number) {
-  const cacheKey = `surah:${id}`;
+  const cacheKey = `surah:v2:${id}`;
   const cached = await readCache(env, 'QURAN_CACHE', cacheKey);
   if (cached) {
     return cached;
@@ -55,7 +55,7 @@ export async function getSurahDetail(env: Env, id: number) {
 
   try {
     const response = await fetch(
-      `https://api.quran.com/api/v4/verses/by_chapter/${id}?language=en&words=false&translations=131&fields=text_uthmani,verse_key`
+      `https://api.quran.com/api/v4/verses/by_chapter/${id}?language=en&words=false&translations=131&fields=text_uthmani,verse_key&per_page=300`
     );
     if (!response.ok) {
       throw new Error('Quran.com surah detail failed');
