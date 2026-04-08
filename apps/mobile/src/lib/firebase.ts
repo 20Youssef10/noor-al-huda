@@ -40,6 +40,10 @@ import { buildEmailLinkActionSettings } from '../features/auth/email-link';
 import { type Bookmark, type UserSettings } from '../types/domain';
 import { bookmarkKey } from '../store/app-store';
 
+const firebaseRnAuth = require('@firebase/auth/dist/rn/index.js') as {
+  getReactNativePersistence: (storage: typeof AsyncStorage) => unknown;
+};
+
 type FirebaseExtra = {
   firebase?: {
     apiKey?: string;
@@ -73,7 +77,9 @@ if (hasFirebaseConfig) {
 export const auth = firebaseApp
   ? (() => {
       try {
-        return initializeAuth(firebaseApp!);
+        return initializeAuth(firebaseApp!, {
+          persistence: firebaseRnAuth.getReactNativePersistence(AsyncStorage) as never,
+        });
       } catch {
         return getAuth(firebaseApp!);
       }
@@ -385,13 +391,10 @@ export async function loadBookmarks(uid: string): Promise<Bookmark[]> {
     return [];
   }
 
-  const snapshot = await getDocs(
-    query(collection(db, 'quran_bookmarks'), orderBy('createdAt', 'desc'))
-  );
+  const snapshot = await getDocs(query(collection(db, 'quran_bookmarks'), where('userId', '==', uid)));
 
   return snapshot.docs
     .map((entry) => entry.data())
-    .filter((entry) => entry.userId === uid)
     .map((entry) => ({
       surahId: Number(entry.surahId),
       surahName: String(entry.surahName),
@@ -400,7 +403,8 @@ export async function loadBookmarks(uid: string): Promise<Bookmark[]> {
         typeof entry.createdAt?.toDate === 'function'
           ? entry.createdAt.toDate().toISOString()
           : new Date().toISOString(),
-    }));
+    }))
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 }
 
 function normalizeBookmarkDocument(entry: Record<string, unknown>): Bookmark | null {

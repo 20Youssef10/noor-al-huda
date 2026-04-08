@@ -61,7 +61,8 @@ export function useGoogleSignIn() {
       offlineAccess: false,
       profileImageSize: 120,
       scopes: ['profile', 'email'],
-    }),
+      ...(googleAuthConfig.androidClientId ? { androidClientId: googleAuthConfig.androidClientId } : {}),
+    } as Parameters<typeof GoogleSignin.configure>[0] & { androidClientId?: string }),
     []
   );
 

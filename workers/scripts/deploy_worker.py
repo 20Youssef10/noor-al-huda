@@ -24,6 +24,7 @@ def main():
             {'type': 'kv_namespace', 'name': 'RADIO_LIST', 'namespace_id': '4c83b16f2dab49e58eafe619865b642f'},
             {'type': 'kv_namespace', 'name': 'AZKAR_CACHE', 'namespace_id': 'd44a5b9f35bc4545960e34ffdb77dd83'},
             {'type': 'plain_text', 'name': 'FIREBASE_PROJECT_ID', 'text': 'noor-al-huda-260326'},
+            {'type': 'plain_text', 'name': 'FIREBASE_WEB_API_KEY', 'text': 'AIzaSyA0Q7SFUTkvj8iyzCM2aYk0lDwuxuMNXDE'},
             {'type': 'ai', 'name': 'AI'},
             {'type': 'vectorize', 'name': 'QURAN_VECTORS', 'index_name': 'quran-semantic-index'},
         ],

@@ -14,6 +14,7 @@ export interface Env {
   };
   MEDIA_BUCKET?: R2Bucket;
   FIREBASE_PROJECT_ID: string;
+  FIREBASE_WEB_API_KEY?: string;
 }
 
 export type PrayerResponse = {
