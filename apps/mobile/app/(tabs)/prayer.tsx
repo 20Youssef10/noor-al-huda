@@ -10,6 +10,7 @@ import {
   cancelScheduledNotificationsAsync,
   ensureLocalNotificationsPermissionAsync,
   registerForPushNotificationsAsync,
+  scheduleDailyPrayerNotifications,
   schedulePrayerReminderAsync,
 } from '../../src/lib/notifications';
 import { theme } from '../../src/lib/theme';
@@ -97,6 +98,19 @@ export default function PrayerScreen() {
     Alert.alert('تم المسح', 'أُزيلت جميع التذكيرات المحلية المجدولة.');
   }
 
+  async function scheduleFullDay() {
+    const notificationsEnabled = await ensureLocalNotificationsPermissionAsync();
+    setNotificationsEnabled(notificationsEnabled);
+    if (!notificationsEnabled) {
+      Alert.alert('الإشعارات غير متاحة', 'يلزم منح إذن الإشعارات أولاً.');
+      return;
+    }
+
+    await cancelScheduledNotificationsAsync();
+    await scheduleDailyPrayerNotifications(settings.location, settings.calculationMethod, { includeAzanLabel: true });
+    Alert.alert('تمت الجدولة', 'تمت إضافة تذكيرات اليوم كاملة مع عناوين الأذان ومواقيت الصلاة.');
+  }
+
   return (
     <Page>
       <SectionHeader title="الصلاة والقبلة" subtitle={settings.location.label} />
@@ -137,6 +151,7 @@ export default function PrayerScreen() {
               disabled={!prayerQuery.data.nextPrayer}
               onPress={() => void scheduleNextPrayerReminder()}
             />
+            <GhostButton label="جدولة اليوم كاملاً" onPress={() => void scheduleFullDay()} />
             <GhostButton label="إلغاء التذكيرات" onPress={() => void clearReminders()} />
           </View>
           {Object.entries(prayerQuery.data.prayers).map(([key, value]) => (

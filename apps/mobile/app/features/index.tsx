@@ -8,6 +8,7 @@ const cards = [
   { href: '/features/tajweed', title: 'مدرب التجويد', subtitle: 'تحليل تلاوة بالذكاء الاصطناعي' },
   { href: '/features/search', title: 'البحث الدلالي', subtitle: 'اكتشف الآيات بالمعنى' },
   { href: '/features/dua', title: 'مولد الدعاء', subtitle: 'دعاء شخصي مع مصادر' },
+  { href: '/features/hadith', title: 'مكتبة الحديث', subtitle: 'كتب ومجموعات وبحث وتمرير مستمر' },
   { href: '/features/companion', title: 'الرفيق اليومي', subtitle: 'تأمل روحاني مخصص لهذا اليوم' },
   { href: '/features/qibla', title: 'قبلة معززة', subtitle: 'بوصلة AR واتجاه مباشر' },
   { href: '/features/halal', title: 'ماسح الحلال', subtitle: 'تحقق من مكونات المنتجات' },

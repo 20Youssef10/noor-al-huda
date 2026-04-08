@@ -187,6 +187,20 @@ export default function HomeScreen() {
         <EmptyState title="لا يوجد محتوى يومي" message="سيظهر حديث وآية اليوم بعد أول مزامنة ناجحة." />
       )}
 
+      {seasonalTheme.id === 'ramadan' ? (
+        <SurfaceCard accent="emerald">
+          <SectionHeader title="برنامج رمضان" subtitle="بطاقة يومية خاصة بالشهر المبارك" />
+          <Text style={styles.bodyText}>اجعل لك ورداً ثابتاً بعد الفجر، وراجع أذكار الصباح والمساء، وجدول تذكيرات الصلاة الكاملة من صفحة الصلاة.</Text>
+          <View style={styles.metricRow}>
+            <MetricTile label="الهدف اليومي" value="جزء / 20 صفحة" hint="ابدأ بعد الفجر أو قبل التراويح" />
+            <MetricTile label="تذكير الإفطار" value={prayerQuery.data?.prayers.maghrib ?? '--:--'} hint="موعد المغرب اليوم" />
+          </View>
+          <Link href="/(tabs)/prayer" asChild>
+            <GhostButton label="افتح الصلاة والتذكيرات" onPress={() => undefined} />
+          </Link>
+        </SurfaceCard>
+      ) : null}
+
       {recentBookmarks.length ? (
         <SurfaceCard accent="gold">
           <SectionHeader title="متابعة القراءة" subtitle="آخر العلامات المحفوظة محلياً" />

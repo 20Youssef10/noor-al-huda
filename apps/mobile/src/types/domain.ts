@@ -32,12 +32,41 @@ export interface SurahVerse {
   number: number;
   arabicText: string;
   translation: string;
+  translations?: Array<{
+    id: string;
+    label: string;
+    text: string;
+  }>;
+  tafsir?: {
+    id: string;
+    label: string;
+    text: string;
+  } | null;
 }
 
 export interface SurahDetail {
   surah: SurahSummary;
   verses: SurahVerse[];
   audioUrl?: string;
+}
+
+export interface QuranTranslationCollection {
+  id: string;
+  label: string;
+  language: string;
+}
+
+export interface QuranTafsirCollection {
+  id: string;
+  label: string;
+  language: string;
+}
+
+export interface QuranReciterCollection {
+  id: string;
+  name: string;
+  server: string;
+  surahList: string[];
 }
 
 export interface HadithCard {
@@ -64,6 +93,7 @@ export interface AzkarEntry {
   text: string;
   count: number;
   virtue: string;
+  collectionTitle?: string;
 }
 
 export type AzkarCollection = 'morning' | 'evening' | 'after-prayer';
@@ -74,6 +104,12 @@ export interface RadioStation {
   country: string;
   description: string;
   streamUrl: string;
+}
+
+export interface HadithCollection {
+  id: string;
+  title: string;
+  count: number;
 }
 
 export interface Bookmark {

@@ -2,6 +2,9 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 
+import { type AppLocation, type PrayerName } from '../types/domain';
+import { computePrayerDateMap } from '../features/prayer/service';
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -11,6 +14,37 @@ Notifications.setNotificationHandler({
     shouldShowList: true,
   }),
 });
+
+const notificationCategories = [
+  {
+    identifier: 'prayer-reminders',
+    actions: [
+      { identifier: 'open-prayer', buttonTitle: 'فتح الصلاة' },
+      { identifier: 'dismiss', buttonTitle: 'لاحقاً', options: { isDestructive: false } },
+    ],
+  },
+  {
+    identifier: 'azkar-reminders',
+    actions: [
+      { identifier: 'open-azkar', buttonTitle: 'فتح الأذكار' },
+      { identifier: 'dismiss', buttonTitle: 'إخفاء' },
+    ],
+  },
+];
+
+const prayerLabels: Record<PrayerName, string> = {
+  fajr: 'الفجر',
+  sunrise: 'الشروق',
+  dhuhr: 'الظهر',
+  asr: 'العصر',
+  maghrib: 'المغرب',
+  isha: 'العشاء',
+};
+
+export async function configureNotificationCategoriesAsync() {
+  await Notifications.setNotificationCategoryAsync('prayer-reminders', notificationCategories[0]!.actions);
+  await Notifications.setNotificationCategoryAsync('azkar-reminders', notificationCategories[1]!.actions);
+}
 
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
   if (!Device.isDevice) {
@@ -52,6 +86,7 @@ export async function schedulePrayerReminderAsync(prayerLabel: string, body: str
       title: `تذكير ${prayerLabel}`,
       body,
       sound: true,
+      categoryIdentifier: 'prayer-reminders',
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
@@ -59,6 +94,35 @@ export async function schedulePrayerReminderAsync(prayerLabel: string, body: str
       repeats: false,
     },
   });
+}
+
+export async function scheduleDailyPrayerNotifications(
+  location: AppLocation,
+  calculationMethod: string,
+  options?: { includeAzanLabel?: boolean }
+) {
+  const map = computePrayerDateMap(new Date(), location, calculationMethod);
+  const entries = Object.entries(map) as Array<[PrayerName, Date]>;
+
+  await configureNotificationCategoriesAsync();
+
+  for (const [name, date] of entries) {
+    if (date.getTime() <= Date.now()) {
+      continue;
+    }
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: options?.includeAzanLabel ? `أذان ${prayerLabels[name]}` : `حان وقت ${prayerLabels[name]}`,
+        body: `حان الآن وقت ${prayerLabels[name]} في ${location.label}.`,
+        sound: true,
+        categoryIdentifier: 'prayer-reminders',
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date,
+      },
+    });
+  }
 }
 
 export async function cancelScheduledNotificationsAsync() {

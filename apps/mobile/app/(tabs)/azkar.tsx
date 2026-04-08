@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Page, SectionHeader, SurfaceCard, GhostButton } from '../../src/components/ui';
-import { fetchAzkarCollection } from '../../src/features/azkar/service';
+import { fetchAzkarCatalog, fetchAzkarCollection } from '../../src/features/azkar/service';
 import { theme } from '../../src/lib/theme';
 import { useAppStore } from '../../src/store/app-store';
 import { type AzkarCollection } from '../../src/types/domain';
@@ -16,13 +16,26 @@ const tabs: Array<{ key: AzkarCollection; label: string }> = [
 
 export default function AzkarScreen() {
   const [activeTab, setActiveTab] = useState<AzkarCollection>('morning');
+  const [search, setSearch] = useState('');
+  const [visibleCount, setVisibleCount] = useState(12);
   const completedAzkar = useAppStore((state) => state.completedAzkar);
   const incrementAzkar = useAppStore((state) => state.incrementAzkar);
+
+  const catalogQuery = useQuery({ queryKey: ['azkar-catalog'], queryFn: fetchAzkarCatalog });
 
   const azkarQuery = useQuery({
     queryKey: ['azkar', activeTab],
     queryFn: () => fetchAzkarCollection(activeTab),
   });
+
+  const filteredEntries = useMemo(() => {
+    const base = azkarQuery.data ?? [];
+    const needle = search.trim();
+    if (!needle) {
+      return base;
+    }
+    return base.filter((entry) => entry.text.includes(needle) || entry.virtue.includes(needle));
+  }, [azkarQuery.data, search]);
 
   return (
     <Page>
@@ -33,26 +46,56 @@ export default function AzkarScreen() {
         ))}
       </View>
 
+      <TextInput
+        style={styles.search}
+        value={search}
+        onChangeText={setSearch}
+        placeholder="ابحث بكلمة داخل الذكر"
+        placeholderTextColor={theme.colors.creamFaint}
+        textAlign="right"
+      />
+
+      {catalogQuery.data ? (
+        <View style={styles.catalogRow}>
+          {catalogQuery.data.slice(0, 10).map((item) => (
+            <GhostButton key={item.id} label={item.title} onPress={() => undefined} />
+          ))}
+        </View>
+      ) : null}
+
       {azkarQuery.isLoading ? (
         <SurfaceCard>
           <ActivityIndicator color={theme.colors.goldLight} />
         </SurfaceCard>
       ) : (
-        azkarQuery.data?.map((entry: Awaited<ReturnType<typeof fetchAzkarCollection>>[number]) => {
-          const progress = completedAzkar[entry.id] ?? 0;
-          const done = progress >= entry.count;
+        <FlatList
+          data={filteredEntries.slice(0, visibleCount)}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false}
+          contentContainerStyle={styles.list}
+          onEndReached={() => setVisibleCount((count) => count + 12)}
+          renderItem={({ item }) => {
+            const progress = completedAzkar[item.id] ?? 0;
+            const done = progress >= item.count;
 
-          return (
-            <SurfaceCard key={entry.id} accent={done ? 'emerald' : 'gold'}>
-              <Text style={styles.zikrText}>{entry.text}</Text>
-              <Text style={styles.virtueText}>{entry.virtue}</Text>
-              <View style={styles.counterRow}>
-                <Text style={styles.counterText}>{progress} / {entry.count}</Text>
-                <GhostButton label={done ? 'أُنجز' : 'تسبيحة'} onPress={() => incrementAzkar(entry.id)} />
-              </View>
-            </SurfaceCard>
-          );
-        })
+            return (
+              <SurfaceCard key={item.id} accent={done ? 'emerald' : 'gold'}>
+                {item.collectionTitle ? <Text style={styles.collectionTitle}>{item.collectionTitle}</Text> : null}
+                <Text style={styles.zikrText}>{item.text}</Text>
+                <Text style={styles.virtueText}>{item.virtue}</Text>
+                <View style={styles.counterRow}>
+                  <Text style={styles.counterText}>{progress} / {item.count}</Text>
+                  <GhostButton label={done ? 'أُنجز' : 'تسبيحة'} onPress={() => incrementAzkar(item.id)} />
+                </View>
+              </SurfaceCard>
+            );
+          }}
+          ListFooterComponent={
+            filteredEntries.length > visibleCount ? (
+              <GhostButton label="تحميل المزيد" onPress={() => setVisibleCount((count) => count + 12)} />
+            ) : null
+          }
+        />
       )}
     </Page>
   );
@@ -63,6 +106,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     flexWrap: 'wrap',
+  },
+  search: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceStrong,
+    color: theme.colors.cream,
+    padding: 14,
+    fontFamily: theme.fonts.body,
+  },
+  catalogRow: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  list: {
+    gap: 12,
+  },
+  collectionTitle: {
+    color: theme.colors.goldLight,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13,
+    textAlign: 'right',
   },
   zikrText: {
     color: theme.colors.cream,

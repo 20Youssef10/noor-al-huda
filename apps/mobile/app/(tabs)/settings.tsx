@@ -22,6 +22,7 @@ export default function SettingsScreen() {
   const syncMessage = useAppStore((state) => state.syncMessage);
   const syncStatus = useAppStore((state) => state.syncStatus);
   const setCalculationMethod = useAppStore((state) => state.setCalculationMethod);
+  const setReciter = useAppStore((state) => state.setReciter);
   const setNotificationsEnabled = useAppStore((state) => state.setNotificationsEnabled);
   const { user } = useAuthUser();
 
@@ -39,6 +40,7 @@ export default function SettingsScreen() {
         <SectionHeader title="الملف الشخصي" subtitle={user ? (user.isAnonymous ? 'جلسة ضيف' : user.email ?? 'حساب موثق') : 'غير مسجل'} />
         <Text style={styles.bodyText}>الموقع: {settings.location.label}</Text>
         <Text style={styles.bodyText}>طريقة الحساب: {calculationMethods[settings.calculationMethod as keyof typeof calculationMethods] ?? settings.calculationMethod}</Text>
+        <Text style={styles.bodyText}>القارئ المختار: {settings.reciter}</Text>
         <Text style={styles.bodyText}>الإشعارات: {settings.notificationsEnabled ? 'مفعلة' : 'غير مفعلة'}</Text>
         <Text style={styles.bodyText}>الإشارات المرجعية: {bookmarks.length}</Text>
         <Text style={styles.bodyText}>المزامنة: {syncStatus}</Text>
@@ -56,6 +58,8 @@ export default function SettingsScreen() {
             label={settings.notificationsEnabled ? 'إيقاف الإشعارات' : 'تفعيل الإشعارات'}
             onPress={() => setNotificationsEnabled(!settings.notificationsEnabled)}
           />
+          <GhostButton label="القارئ: مشاري العفاسي" onPress={() => setReciter('مشاري العفاسي')} />
+          <GhostButton label="القارئ: السديس" onPress={() => setReciter('عبدالرحمن السديس')} />
         </View>
       </SurfaceCard>
 
@@ -102,6 +106,9 @@ export default function SettingsScreen() {
           </Link>
           <Link href="/features/dua" asChild>
             <GhostButton label="مولد الدعاء" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/hadith" asChild>
+            <GhostButton label="مكتبة الحديث" onPress={() => undefined} />
           </Link>
           <Link href="/features/companion" asChild>
             <GhostButton label="الرفيق اليومي" onPress={() => undefined} />

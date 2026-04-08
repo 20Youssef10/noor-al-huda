@@ -19,6 +19,7 @@ type AppState = {
   syncMessage: string | null;
   setLocation: (location: UserSettings['location']) => void;
   setCalculationMethod: (calculationMethod: string) => void;
+  setReciter: (reciter: string) => void;
   setNotificationsEnabled: (notificationsEnabled: boolean) => void;
   setActiveRadioId: (activeRadioId: string | null) => void;
   setCurrentAudio: (currentAudioUrl: string | null, audioLabel?: string | null) => void;
@@ -69,6 +70,10 @@ export const useAppStore = create<AppState>()(
       setCalculationMethod: (calculationMethod) =>
         set((state) => ({
           settings: { ...state.settings, calculationMethod },
+        })),
+      setReciter: (reciter) =>
+        set((state) => ({
+          settings: { ...state.settings, reciter },
         })),
       setNotificationsEnabled: (notificationsEnabled) =>
         set((state) => ({

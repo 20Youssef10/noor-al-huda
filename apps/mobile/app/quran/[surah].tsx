@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { GhostButton, Page, PrimaryButton, SectionHeader, SurfaceCard } from '../../src/components/ui';
 import { useAuthUser } from '../../src/features/auth/service';
-import { fetchSurahDetail } from '../../src/features/quran/service';
+import { buildReciterAudioUrl, fetchReciterCollections, fetchSurahDetail, fetchTafsirCollections, fetchTranslationCollections } from '../../src/features/quran/service';
 import { useAudioPlayer } from '../../src/hooks/useAudioPlayer';
 import { theme } from '../../src/lib/theme';
 import { useAppStore } from '../../src/store/app-store';
@@ -18,12 +18,30 @@ export default function SurahDetailScreen() {
   const bookmarks = useAppStore((state) => state.bookmarks);
   const toggleBookmark = useAppStore((state) => state.toggleBookmark);
   const setLastReadSurahId = useAppStore((state) => state.setLastReadSurahId);
+  const settings = useAppStore((state) => state.settings);
+  const setReciter = useAppStore((state) => state.setReciter);
   const { user } = useAuthUser();
   const audioPlayer = useAudioPlayer();
+  const [selectedTranslationId, setSelectedTranslationId] = useState('en.asad');
+  const [selectedTafsirId, setSelectedTafsirId] = useState('ar.muyassar');
+
+  const translationsQuery = useQuery({ queryKey: ['translation-collections'], queryFn: fetchTranslationCollections });
+  const tafsirQuery = useQuery({ queryKey: ['tafsir-collections'], queryFn: fetchTafsirCollections });
+  const recitersQuery = useQuery({ queryKey: ['reciter-collections'], queryFn: fetchReciterCollections });
+
+  const selectedReciter = useMemo(
+    () => recitersQuery.data?.find((item) => item.name === settings.reciter) ?? recitersQuery.data?.[0],
+    [recitersQuery.data, settings.reciter]
+  );
 
   const surahQuery = useQuery({
-    queryKey: ['surah-detail', surahId],
-    queryFn: () => fetchSurahDetail(surahId),
+    queryKey: ['surah-detail', surahId, selectedTranslationId, selectedTafsirId, selectedReciter?.id],
+    queryFn: () =>
+      fetchSurahDetail(surahId, {
+        translationIds: [selectedTranslationId],
+        tafsirId: selectedTafsirId,
+        reciter: selectedReciter,
+      }),
   });
 
   const bookmark = useMemo(
@@ -87,19 +105,35 @@ export default function SurahDetailScreen() {
               title={surahQuery.data.surah.name}
               subtitle={`${surahQuery.data.surah.transliteration} · ${surahQuery.data.surah.versesCount} آية`}
             />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>
+              {(translationsQuery.data ?? []).slice(0, 6).map((item) => (
+                <GhostButton key={item.id} label={item.label} onPress={() => setSelectedTranslationId(item.id)} />
+              ))}
+            </ScrollView>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>
+              {(tafsirQuery.data ?? []).slice(0, 6).map((item) => (
+                <GhostButton key={item.id} label={item.label} onPress={() => setSelectedTafsirId(item.id)} />
+              ))}
+            </ScrollView>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>
+              {(recitersQuery.data ?? []).slice(0, 8).map((item) => (
+                <GhostButton key={item.id} label={item.name} onPress={() => setReciter(item.name)} />
+              ))}
+            </ScrollView>
             <View style={styles.actionRow}>
               {surahQuery.data.audioUrl ? (
                 <PrimaryButton
                   label={
-                    audioPlayer.currentUrl === surahQuery.data.audioUrl && audioPlayer.isPlaying
+                    audioPlayer.currentUrl === buildReciterAudioUrl(selectedReciter, surahId) && audioPlayer.isPlaying
                       ? 'إيقاف مؤقت'
                       : 'استماع'
                   }
                   onPress={() => {
-                    if (audioPlayer.currentUrl === surahQuery.data?.audioUrl) {
+                    const targetAudio = buildReciterAudioUrl(selectedReciter, surahId);
+                    if (audioPlayer.currentUrl === targetAudio) {
                       void audioPlayer.toggle();
-                    } else if (surahQuery.data?.audioUrl) {
-                      void audioPlayer.play(surahQuery.data.audioUrl, surahQuery.data.surah.name);
+                    } else if (targetAudio) {
+                      void audioPlayer.play(targetAudio, `${surahQuery.data.surah.name} - ${selectedReciter?.name ?? 'القارئ الافتراضي'}`);
                     }
                   }}
                 />
@@ -112,7 +146,8 @@ export default function SurahDetailScreen() {
             <SurfaceCard key={verse.number} accent="gold">
               <Text style={styles.verseNumber}>الآية {verse.number}</Text>
               <Text style={styles.verseArabic}>{verse.arabicText}</Text>
-              <Text style={styles.verseTranslation}>{verse.translation}</Text>
+              <Text style={styles.verseTranslation}>{verse.translations?.find((item) => item.id === selectedTranslationId)?.text ?? verse.translation}</Text>
+              {verse.tafsir?.text ? <Text style={styles.tafsirText}>{verse.tafsir.text}</Text> : null}
             </SurfaceCard>
           ))}
         </>
@@ -145,6 +180,10 @@ const styles = StyleSheet.create({
     gap: 10,
     flexWrap: 'wrap',
   },
+  selectorRow: {
+    gap: 8,
+    paddingVertical: 2,
+  },
   verseNumber: {
     color: theme.colors.goldLight,
     fontFamily: theme.fonts.bodyBold,
@@ -160,6 +199,13 @@ const styles = StyleSheet.create({
   },
   verseTranslation: {
     color: theme.colors.creamMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 14,
+    lineHeight: 24,
+    textAlign: 'right',
+  },
+  tafsirText: {
+    color: theme.colors.goldLight,
     fontFamily: theme.fonts.body,
     fontSize: 14,
     lineHeight: 24,

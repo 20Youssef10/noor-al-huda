@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { fallbackAzkar } from '../../data/fallback';
 import { getCachedContent, putCachedContent } from '../../lib/sqlite';
-import { type AzkarCollection } from '../../types/domain';
+import { type AzkarCollection, type AzkarEntry } from '../../types/domain';
 
 const azkarSchema = z.array(
   z.object({
@@ -21,11 +21,38 @@ const hisnItemSchema = z.object({
 
 const hisnCollectionSchema = z.record(z.string(), z.array(hisnItemSchema));
 
-export async function fetchAzkarCollection(collection: AzkarCollection) {
-  const cached = await getCachedContent<z.infer<typeof azkarSchema>>('azkar', collection);
+const hisnCatalogSchema = z.object({
+  العربية: z.array(
+    z.object({
+      ID: z.number(),
+      TITLE: z.string(),
+    })
+  ),
+});
+
+export type AzkarCatalogItem = { id: number; title: string };
+
+const categoryMap: Record<AzkarCollection, number> = {
+  morning: 27,
+  evening: 27,
+  'after-prayer': 25,
+};
+
+export async function fetchAzkarCatalog(): Promise<AzkarCatalogItem[]> {
+  const response = await fetch('https://www.hisnmuslim.com/api/ar/husn_ar.json');
+  if (!response.ok) {
+    throw new Error(`azkar-catalog-failed-${response.status}`);
+  }
+  const raw = await response.text();
+  const payload = hisnCatalogSchema.parse(JSON.parse(raw.replace(/^\ufeff/, '')));
+  return payload.العربية.map((item) => ({ id: item.ID, title: item.TITLE }));
+}
+
+export async function fetchAzkarCollection(collection: AzkarCollection): Promise<AzkarEntry[]> {
+  const cached = await getCachedContent<AzkarEntry[]>('azkar', collection);
 
   try {
-    const categoryId = collection === 'after-prayer' ? 25 : 27;
+    const categoryId = categoryMap[collection];
     const response = await fetch(`https://www.hisnmuslim.com/api/ar/${categoryId}.json`);
     if (!response.ok) {
       throw new Error(`azkar-failed-${response.status}`);
@@ -34,11 +61,22 @@ export async function fetchAzkarCollection(collection: AzkarCollection) {
     const payload = hisnCollectionSchema.parse(JSON.parse(raw.replace(/^\ufeff/, '')));
     const list = (Object.values(payload)[0] ?? []) as Array<z.infer<typeof hisnItemSchema>>;
     const remote = azkarSchema.parse(
-      list.slice(0, 40).map((item) => ({
+      list.slice(0, 80).map((item) => ({
         id: String(item.ID),
         text: item.ARABIC_TEXT,
         count: item.REPEAT,
-        virtue: collection === 'after-prayer' ? 'ذكر بعد الصلاة من حصن المسلم.' : 'ذكر حي من حصن المسلم.',
+        virtue:
+          collection === 'morning'
+            ? 'ورد الصباح من حصن المسلم.'
+            : collection === 'evening'
+              ? 'ورد المساء من حصن المسلم.'
+              : 'ذكر بعد الصلاة من حصن المسلم.',
+        collectionTitle:
+          collection === 'morning'
+            ? 'أذكار الصباح'
+            : collection === 'evening'
+              ? 'أذكار المساء'
+              : 'الأذكار بعد الصلاة',
       }))
     );
     await putCachedContent('azkar', collection, remote);
