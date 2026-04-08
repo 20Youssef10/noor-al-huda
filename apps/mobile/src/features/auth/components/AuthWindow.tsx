@@ -47,7 +47,7 @@ export function AuthWindow({
   return (
     <SurfaceCard accent="blue">
       <View style={styles.logoRow}>
-        <Image source={require('../../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
+        <Image source={require('../../../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
         <View style={styles.logoTextWrap}>
           <Text style={styles.logoTitle}>بوابة نور الهدى</Text>
           <Text style={styles.logoSubtitle}>سجّل الدخول لمزامنة قراءتك وإعداداتك والوصول الهادئ إلى كل أدوات التطبيق.</Text>
