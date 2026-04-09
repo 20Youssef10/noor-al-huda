@@ -49,7 +49,128 @@ const companionResultSchema = z.object({
   focus_type: z.string(),
 });
 
+const assistantInputSchema = z.object({
+  question: z.string().min(3),
+});
+
+const assistantResultSchema = z.object({
+  answer: z.string(),
+  sources: z.array(z.string()),
+});
+
+const quizInputSchema = z.object({
+  topic: z.string().min(2),
+});
+
+const quizResultSchema = z.object({
+  title: z.string(),
+  questions: z.array(
+    z.object({
+      question: z.string(),
+      options: z.array(z.string()),
+      answerIndex: z.number(),
+    })
+  ),
+});
+
+const moodInputSchema = z.object({
+  mood: z.string().min(2),
+});
+
+const moodResultSchema = z.object({
+  suggestion: z.string(),
+  ayah: z.string(),
+  dhikr: z.string(),
+});
+
 export const aiRoutes = new Hono<{ Bindings: Env }>();
+
+aiRoutes.post('/assistant/ask', async (c) => {
+  const { question } = assistantInputSchema.parse(await c.req.json());
+  const fallback = {
+    answer: `بخصوص سؤالك: ${question}، ارجع إلى النصوص المحكمة وأقوال أهل العلم الثقات، وابدأ بالأدلة الواضحة ثم اسأل عالماً موثوقاً عند الاشتباه.`,
+    sources: ['القرآن الكريم', 'السنة النبوية', 'أقوال أهل العلم'],
+  };
+
+  if (!c.env.AI) {
+    return c.json(fallback);
+  }
+
+  const prompt = `أنت مساعد إسلامي منضبط. أجب بإيجاز بالعربية الفصحى مع مصادر مختصرة. أجب بـ JSON فقط: {"answer":"...","sources":["..."]}. السؤال: ${question}`;
+  const response = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: 350,
+    temperature: 0.2,
+  }) as { response?: string };
+
+  try {
+    return c.json(assistantResultSchema.parse(JSON.parse(response.response?.match(/\{[\s\S]*\}/)?.[0] ?? '{}')));
+  } catch {
+    return c.json(fallback);
+  }
+});
+
+aiRoutes.post('/quiz/generate', async (c) => {
+  const { topic } = quizInputSchema.parse(await c.req.json());
+  const fallback = {
+    title: `اختبار في ${topic}`,
+    questions: [
+      {
+        question: `ما أبرز معنى يرتبط بموضوع ${topic}؟`,
+        options: ['الصبر', 'الجهل', 'التسرع', 'الغفلة'],
+        answerIndex: 0,
+      },
+      {
+        question: 'أي الأعمال أحب إلى الله؟',
+        options: ['ما كان خالصاً وصواباً', 'ما كان كثيراً فقط', 'ما كان سهلاً فقط', 'ما كان مشهوراً'],
+        answerIndex: 0,
+      },
+    ],
+  };
+
+  if (!c.env.AI) {
+    return c.json(fallback);
+  }
+
+  const prompt = `أنشئ اختباراً قصيراً من 3 أسئلة في موضوع ${topic}. أجب بـ JSON فقط بالشكل {"title":"...","questions":[{"question":"...","options":["..."],"answerIndex":0}]}`;
+  const response = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: 500,
+    temperature: 0.4,
+  }) as { response?: string };
+
+  try {
+    return c.json(quizResultSchema.parse(JSON.parse(response.response?.match(/\{[\s\S]*\}/)?.[0] ?? '{}')));
+  } catch {
+    return c.json(fallback);
+  }
+});
+
+aiRoutes.post('/mood/suggest', async (c) => {
+  const { mood } = moodInputSchema.parse(await c.req.json());
+  const fallback = {
+    suggestion: `إذا كنت تشعر بـ ${mood} فابدأ بورد قصير من القرآن ثم استغفار وذكر هادئ.`,
+    ayah: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',
+    dhikr: 'أستغفر الله وأتوب إليه',
+  };
+
+  if (!c.env.AI) {
+    return c.json(fallback);
+  }
+
+  const prompt = `اقترح آية وذكراً مناسبين لحالة شعورية بعنوان: ${mood}. أجب بـ JSON فقط: {"suggestion":"...","ayah":"...","dhikr":"..."}`;
+  const response = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: 220,
+    temperature: 0.4,
+  }) as { response?: string };
+
+  try {
+    return c.json(moodResultSchema.parse(JSON.parse(response.response?.match(/\{[\s\S]*\}/)?.[0] ?? '{}')));
+  } catch {
+    return c.json(fallback);
+  }
+});
 
 aiRoutes.post('/dua/generate', async (c) => {
   const { situation } = duaInputSchema.parse(await c.req.json());

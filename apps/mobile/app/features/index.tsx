@@ -16,6 +16,7 @@ const cards = [
   { href: '/features/knowledge', title: 'المعرفة الإسلامية', subtitle: 'أسماء الله، الرقية، الفقه، الكتب، والبث' },
   { href: '/features/assistant', title: 'المساعد الإسلامي', subtitle: 'أسئلة شرعية بإسناد ومصادر' },
   { href: '/features/quiz', title: 'الاختبارات', subtitle: 'أسئلة ومسابقات معرفية' },
+  { href: '/features/mood', title: 'تحليل المزاج', subtitle: 'ذكر وآيات حسب الشعور الحالي' },
   { href: '/features/tasbih', title: 'المسبحة الذكية', subtitle: 'عداد واهتزاز عند الإتمام' },
   { href: '/features/profile', title: 'الملف الشخصي', subtitle: 'الحساب والإنجازات والإعدادات' },
   { href: '/features/privacy-policy', title: 'سياسة الخصوصية', subtitle: 'بنود الخصوصية وحماية البيانات' },

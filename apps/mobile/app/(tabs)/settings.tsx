@@ -129,6 +129,9 @@ export default function SettingsScreen() {
           <Link href="/features/quiz" asChild>
             <GhostButton label="الاختبارات" onPress={() => undefined} />
           </Link>
+          <Link href="/features/mood" asChild>
+            <GhostButton label="تحليل المزاج" onPress={() => undefined} />
+          </Link>
           <Link href="/features/privacy" asChild>
             <GhostButton label="الخصوصية" onPress={() => undefined} />
           </Link>
