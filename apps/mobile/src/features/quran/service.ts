@@ -62,7 +62,16 @@ const quranVersesSchema = z.object({
     z.object({
       verse_number: z.number(),
       text_uthmani: z.string(),
+      text_uthmani_tajweed: z.string().optional(),
       translations: z.array(z.object({ text: z.string().optional() })).optional(),
+      words: z.array(
+        z.object({
+          id: z.number(),
+          text: z.string().optional(),
+          translation: z.object({ text: z.string().optional() }).optional(),
+          transliteration: z.object({ text: z.string().optional() }).optional(),
+        })
+      ).optional(),
     })
   ),
 });
@@ -250,7 +259,7 @@ export async function fetchSurahDetail(
   try {
     const [surahList, versesResponse, translations, tafsirs, reciters] = await Promise.all([
       fetchSurahList(),
-      fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahId}?language=en&words=false&translations=131&fields=text_uthmani,verse_key&per_page=300`),
+      fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahId}?language=en&words=true&translations=131&fields=text_uthmani,text_uthmani_tajweed,verse_key&per_page=300`),
       fetchTranslationCollections(),
       fetchTafsirCollections(),
       fetchReciterCollections(),
@@ -269,6 +278,7 @@ export async function fetchSurahDetail(
       verses: versesPayload.verses.map((verse) => ({
         number: verse.verse_number,
         arabicText: verse.text_uthmani,
+        tajweedText: verse.text_uthmani_tajweed,
         translation: verse.translations?.[0]?.text ?? '',
         translations: selectedTranslationIds.map((id) => ({
           id,
@@ -280,6 +290,13 @@ export async function fetchSurahDetail(
           label: tafsirs.find((item) => item.id === selectedTafsirId)?.label ?? selectedTafsirId,
           text: enhancementMap.get(selectedTafsirId)?.ayahs.find((item) => item.numberInSurah === verse.verse_number)?.text ?? '',
         },
+        words: (verse.words ?? []).map((word) => ({
+          id: String(word.id),
+          text: word.text ?? '',
+          meaning: word.translation?.text ?? '',
+          transliteration: word.transliteration?.text ?? '',
+          grammar: word.translation?.text ? 'شرح لفظي مختصر' : undefined,
+        })),
       })),
       audioUrl: buildReciterAudioUrl(options?.reciter ?? reciters[0], surahId),
     });

@@ -24,6 +24,8 @@ type AppState = {
   setHourlyReminderMinutes: (minutes: number) => void;
   setMorningEveningReminders: (enabled: boolean) => void;
   setAdhanSound: (adhanSound: 'default' | 'adhan') => void;
+  setQuranFontScale: (scale: number) => void;
+  setQuranFontFamily: (family: 'naskh' | 'amiri') => void;
   setNotificationsEnabled: (notificationsEnabled: boolean) => void;
   setActiveRadioId: (activeRadioId: string | null) => void;
   setCurrentAudio: (currentAudioUrl: string | null, audioLabel?: string | null) => void;
@@ -62,6 +64,8 @@ export const useAppStore = create<AppState>()(
         hourlyReminderMinutes: 60,
         morningEveningReminders: true,
         adhanSound: 'default',
+        quranFontScale: 1,
+        quranFontFamily: 'naskh',
       },
       bookmarks: [],
       completedAzkar: {},
@@ -98,6 +102,14 @@ export const useAppStore = create<AppState>()(
       setAdhanSound: (adhanSound) =>
         set((state) => ({
           settings: { ...state.settings, adhanSound },
+        })),
+      setQuranFontScale: (quranFontScale) =>
+        set((state) => ({
+          settings: { ...state.settings, quranFontScale },
+        })),
+      setQuranFontFamily: (quranFontFamily) =>
+        set((state) => ({
+          settings: { ...state.settings, quranFontFamily },
         })),
       setNotificationsEnabled: (notificationsEnabled) =>
         set((state) => ({

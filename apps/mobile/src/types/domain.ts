@@ -31,6 +31,7 @@ export interface SurahSummary {
 export interface SurahVerse {
   number: number;
   arabicText: string;
+  tajweedText?: string;
   translation: string;
   translations?: Array<{
     id: string;
@@ -42,6 +43,13 @@ export interface SurahVerse {
     label: string;
     text: string;
   } | null;
+  words?: Array<{
+    id: string;
+    text: string;
+    meaning: string;
+    transliteration: string;
+    grammar?: string;
+  }>;
 }
 
 export interface SurahDetail {
@@ -138,6 +146,8 @@ export interface UserSettings {
   hourlyReminderMinutes?: number;
   morningEveningReminders?: boolean;
   adhanSound?: 'default' | 'adhan';
+  quranFontScale?: number;
+  quranFontFamily?: 'naskh' | 'amiri';
 }
 
 export interface IslamicEvent {

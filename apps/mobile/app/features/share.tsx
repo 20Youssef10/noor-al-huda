@@ -4,7 +4,7 @@ import { ShareCardGenerator } from '../../src/features/sharing/ShareCardGenerato
 export default function ShareFeatureScreen() {
   return (
     <Page>
-      <SectionHeader title="بطاقات المشاركة" subtitle="12 قالباً بروح إسلامية أنيقة" />
+      <SectionHeader title="بطاقات المشاركة" subtitle="عدّل النص والخلفية والقالب قبل المشاركة" />
       <ShareCardGenerator
         type="ayah"
         content_ar="رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا"

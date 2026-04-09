@@ -21,6 +21,8 @@ export default function SurahDetailScreen() {
   const setLastReadSurahId = useAppStore((state) => state.setLastReadSurahId);
   const settings = useAppStore((state) => state.settings);
   const setReciter = useAppStore((state) => state.setReciter);
+  const setQuranFontScale = useAppStore((state) => state.setQuranFontScale);
+  const setQuranFontFamily = useAppStore((state) => state.setQuranFontFamily);
   const { user } = useAuthUser();
   const audioPlayer = useAudioPlayer();
   const [selectedTranslationId, setSelectedTranslationId] = useState('en.asad');
@@ -131,6 +133,26 @@ export default function SurahDetailScreen() {
                   }
                 }}
               />
+              <SelectSheet
+                label="الخط"
+                value={settings.quranFontFamily ?? 'naskh'}
+                options={[
+                  { value: 'naskh', label: 'نسخ' },
+                  { value: 'amiri', label: 'أميري' },
+                ]}
+                onSelect={(value) => setQuranFontFamily(value as 'naskh' | 'amiri')}
+              />
+              <SelectSheet
+                label="الحجم"
+                value={String(settings.quranFontScale ?? 1)}
+                options={[
+                  { value: '0.9', label: 'صغير' },
+                  { value: '1', label: 'متوسط' },
+                  { value: '1.15', label: 'كبير' },
+                  { value: '1.3', label: 'كبير جداً' },
+                ]}
+                onSelect={(value) => setQuranFontScale(Number(value))}
+              />
             </View>
             <View style={styles.actionRow}>
               {targetAudio ? (
@@ -157,7 +179,29 @@ export default function SurahDetailScreen() {
           {surahQuery.data.verses.map((verse: Awaited<ReturnType<typeof fetchSurahDetail>>['verses'][number]) => (
             <SurfaceCard key={verse.number} accent="gold">
               <Text style={styles.verseNumber}>الآية {verse.number}</Text>
-              <Text style={styles.verseArabic}>{verse.arabicText}</Text>
+              <TajweedText
+                text={verse.tajweedText ?? verse.arabicText}
+                fontFamily={settings.quranFontFamily ?? 'naskh'}
+                fontScale={settings.quranFontScale ?? 1}
+              />
+              {verse.words?.length ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.wordsRow}>
+                  {verse.words.map((word) => (
+                    <GhostButton
+                      key={word.id}
+                      label={word.transliteration || word.text || 'كلمة'}
+                      onPress={() =>
+                        Alert.alert(
+                          word.text || 'كلمة',
+                          [word.meaning ? `المعنى: ${word.meaning}` : '', word.grammar ? `الشرح: ${word.grammar}` : '']
+                            .filter(Boolean)
+                            .join('\n') || 'لا توجد تفاصيل إضافية.'
+                        )
+                      }
+                    />
+                  ))}
+                </ScrollView>
+              ) : null}
               <Text style={styles.verseTranslation}>{verse.translations?.find((item) => item.id === selectedTranslationId)?.text ?? verse.translation}</Text>
               {verse.tafsir?.text ? <Text style={styles.tafsirText}>{verse.tafsir.text}</Text> : null}
             </SurfaceCard>
@@ -166,6 +210,69 @@ export default function SurahDetailScreen() {
       ) : null}
     </Page>
   );
+}
+
+function TajweedText({
+  text,
+  fontFamily,
+  fontScale,
+}: {
+  text: string;
+  fontFamily: 'naskh' | 'amiri';
+  fontScale: number;
+}) {
+  const parts = text.split(/(<\/?.+?>)/g).filter(Boolean);
+  let activeClass = '';
+
+  return (
+    <Text
+      style={[
+        styles.verseArabic,
+        {
+          fontFamily: fontFamily === 'amiri' ? theme.fonts.display : theme.fonts.arabic,
+          fontSize: 24 * fontScale,
+          lineHeight: 42 * fontScale,
+        },
+      ]}
+    >
+      {parts.map((part, index) => {
+        if (part.startsWith('<tajweed')) {
+          const match = part.match(/class=([^ >]+)/);
+          activeClass = match?.[1]?.replace(/['"]/g, '') ?? '';
+          return null;
+        }
+        if (part.startsWith('</tajweed')) {
+          activeClass = '';
+          return null;
+        }
+        if (part.startsWith('<span')) {
+          return null;
+        }
+        if (part.startsWith('</span')) {
+          return null;
+        }
+        return (
+          <Text key={`${part}-${index}`} style={getTajweedStyle(activeClass)}>
+            {part.replace(/<[^>]+>/g, '')}
+          </Text>
+        );
+      })}
+    </Text>
+  );
+}
+
+function getTajweedStyle(kind: string) {
+  switch (kind) {
+    case 'madda_normal':
+    case 'madda_permissible':
+      return { color: '#60A5FA' };
+    case 'laam_shamsiyah':
+      return { color: '#F59E0B' };
+    case 'ham_wasl':
+      return { color: '#34D399' };
+    default:
+      return { color: theme.colors.cream };
+  }
 }
 
 const styles = StyleSheet.create({
@@ -227,5 +334,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 24,
     textAlign: 'right',
+  },
+  wordsRow: {
+    gap: 8,
   },
 });

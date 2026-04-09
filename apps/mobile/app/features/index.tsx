@@ -12,6 +12,7 @@ const cards = [
   { href: '/features/companion', title: 'الرفيق اليومي', subtitle: 'تأمل روحاني مخصص لهذا اليوم' },
   { href: '/features/calendar', title: 'التقويم الهجري', subtitle: 'التاريخ الهجري والمناسبات الإسلامية' },
   { href: '/features/seerah', title: 'السيرة والقصص', subtitle: 'سيرة النبي ﷺ وقصص الأنبياء' },
+  { href: '/features/knowledge', title: 'المعرفة الإسلامية', subtitle: 'أسماء الله، الرقية، الفقه، الكتب، والبث' },
   { href: '/features/qibla', title: 'قبلة معززة', subtitle: 'بوصلة AR واتجاه مباشر' },
   { href: '/features/halal', title: 'ماسح الحلال', subtitle: 'تحقق من مكونات المنتجات' },
   { href: '/features/tracker', title: 'متابعة العبادة', subtitle: 'تتبع الصيام والورد والصدقة' },

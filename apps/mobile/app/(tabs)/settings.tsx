@@ -93,6 +93,9 @@ export default function SettingsScreen() {
           <Link href="/features/seerah" asChild>
             <GhostButton label="السيرة والقصص" onPress={() => undefined} />
           </Link>
+          <Link href="/features/knowledge" asChild>
+            <GhostButton label="المعرفة الإسلامية" onPress={() => undefined} />
+          </Link>
           <Link href="/features/qibla" asChild>
             <GhostButton label="القبلة" onPress={() => undefined} />
           </Link>
