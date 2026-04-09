@@ -82,7 +82,6 @@ const config: ExpoConfig = {
         enableBackgroundRecording: false
       }
     ],
-    'expo-web-browser',
     'expo-localization',
     'expo-apple-authentication',
     'expo-notifications',
