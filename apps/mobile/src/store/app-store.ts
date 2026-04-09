@@ -21,6 +21,9 @@ type AppState = {
   setCalculationMethod: (calculationMethod: string) => void;
   setReciter: (reciter: string) => void;
   setSeasonalMode: (seasonalMode: 'auto' | 'ramadan') => void;
+  setHourlyReminderMinutes: (minutes: number) => void;
+  setMorningEveningReminders: (enabled: boolean) => void;
+  setAdhanSound: (adhanSound: 'default' | 'adhan') => void;
   setNotificationsEnabled: (notificationsEnabled: boolean) => void;
   setActiveRadioId: (activeRadioId: string | null) => void;
   setCurrentAudio: (currentAudioUrl: string | null, audioLabel?: string | null) => void;
@@ -56,6 +59,9 @@ export const useAppStore = create<AppState>()(
         reciter: 'Mishary Rashid Alafasy',
         notificationsEnabled: true,
         seasonalMode: 'auto',
+        hourlyReminderMinutes: 60,
+        morningEveningReminders: true,
+        adhanSound: 'default',
       },
       bookmarks: [],
       completedAzkar: {},
@@ -80,6 +86,18 @@ export const useAppStore = create<AppState>()(
       setSeasonalMode: (seasonalMode) =>
         set((state) => ({
           settings: { ...state.settings, seasonalMode },
+        })),
+      setHourlyReminderMinutes: (hourlyReminderMinutes) =>
+        set((state) => ({
+          settings: { ...state.settings, hourlyReminderMinutes },
+        })),
+      setMorningEveningReminders: (morningEveningReminders) =>
+        set((state) => ({
+          settings: { ...state.settings, morningEveningReminders },
+        })),
+      setAdhanSound: (adhanSound) =>
+        set((state) => ({
+          settings: { ...state.settings, adhanSound },
         })),
       setNotificationsEnabled: (notificationsEnabled) =>
         set((state) => ({

@@ -142,21 +142,25 @@ export async function fetchSurahList() {
 }
 
 export async function fetchTranslationCollections(): Promise<QuranTranslationCollection[]> {
+  const cacheKey = 'collections:translations';
+  const cached = await getCachedContent<QuranTranslationCollection[]>('quran-meta', cacheKey);
   try {
     const response = await fetch('https://api.alquran.cloud/v1/edition');
     if (!response.ok) {
       throw new Error(`translation-editions-failed-${response.status}`);
     }
     const payload = alQuranEditionSchema.parse(await response.json());
-    return payload.data
+    const result = payload.data
       .filter((item) => item.type === 'translation' && defaultTranslationIds.includes(item.identifier))
       .map((item) => ({
         id: item.identifier,
         label: item.language === 'ar' ? `${item.name} (عربي)` : item.englishName,
         language: item.language,
       }));
+    await putCachedContent('quran-meta', cacheKey, result);
+    return result;
   } catch {
-    return [
+    return cached ?? [
       { id: 'en.asad', label: 'Muhammad Asad', language: 'en' },
       { id: 'en.pickthall', label: 'Pickthall', language: 'en' },
       { id: 'ar.muyassar', label: 'تفسير الميسر (كترجمة عربية)', language: 'ar' },
@@ -165,21 +169,25 @@ export async function fetchTranslationCollections(): Promise<QuranTranslationCol
 }
 
 export async function fetchTafsirCollections(): Promise<QuranTafsirCollection[]> {
+  const cacheKey = 'collections:tafsir';
+  const cached = await getCachedContent<QuranTafsirCollection[]>('quran-meta', cacheKey);
   try {
     const response = await fetch('https://api.alquran.cloud/v1/edition');
     if (!response.ok) {
       throw new Error(`tafsir-editions-failed-${response.status}`);
     }
     const payload = alQuranEditionSchema.parse(await response.json());
-    return payload.data
+    const result = payload.data
       .filter((item) => item.type === 'tafsir' && defaultTafsirIds.includes(item.identifier))
       .map((item) => ({
         id: item.identifier,
         label: item.language === 'ar' ? item.name : item.englishName,
         language: item.language,
       }));
+    await putCachedContent('quran-meta', cacheKey, result);
+    return result;
   } catch {
-    return [
+    return cached ?? [
       { id: 'ar.muyassar', label: 'التفسير الميسر', language: 'ar' },
       { id: 'en.asad', label: 'Asad Notes', language: 'en' },
     ];
@@ -187,13 +195,15 @@ export async function fetchTafsirCollections(): Promise<QuranTafsirCollection[]>
 }
 
 export async function fetchReciterCollections(): Promise<QuranReciterCollection[]> {
+  const cacheKey = 'collections:reciters';
+  const cached = await getCachedContent<QuranReciterCollection[]>('quran-meta', cacheKey);
   try {
     const response = await fetch('https://www.mp3quran.net/api/v3/reciters?language=ar');
     if (!response.ok) {
       throw new Error(`reciters-failed-${response.status}`);
     }
     const payload = mp3RecitersSchema.parse(await response.json());
-    return payload.reciters
+    const result = payload.reciters
       .filter((item) => item.moshaf?.[0]?.server)
       .slice(0, 18)
       .map((item) => ({
@@ -202,8 +212,10 @@ export async function fetchReciterCollections(): Promise<QuranReciterCollection[
         server: item.moshaf?.[0]?.server ?? '',
         surahList: (item.moshaf?.[0]?.surah_list ?? '').split(',').filter(Boolean),
       }));
+    await putCachedContent('quran-meta', cacheKey, result);
+    return result;
   } catch {
-    return [
+    return cached ?? [
       { id: 'default-afs', name: 'مشاري العفاسي', server: 'https://server8.mp3quran.net/afs/', surahList: Array.from({ length: 114 }, (_, index) => String(index + 1)) },
     ];
   }

@@ -81,6 +81,8 @@ export interface HadithCard {
   title: string;
   text: string;
   source: string;
+  englishText?: string;
+  collectionId?: string;
 }
 
 export interface AyahCard {
@@ -117,6 +119,7 @@ export interface HadithCollection {
   id: string;
   title: string;
   count: number;
+  bookGroup?: string;
 }
 
 export interface Bookmark {
@@ -132,4 +135,22 @@ export interface UserSettings {
   reciter: string;
   notificationsEnabled: boolean;
   seasonalMode?: 'auto' | 'ramadan';
+  hourlyReminderMinutes?: number;
+  morningEveningReminders?: boolean;
+  adhanSound?: 'default' | 'adhan';
+}
+
+export interface IslamicEvent {
+  id: string;
+  title: string;
+  hijriMonth: number;
+  hijriDay: number;
+  description: string;
+}
+
+export interface ProphetStory {
+  id: string;
+  title: string;
+  summary: string;
+  lessons: string[];
 }

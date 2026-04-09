@@ -10,9 +10,12 @@ import {
   cancelScheduledNotificationsAsync,
   ensureLocalNotificationsPermissionAsync,
   registerForPushNotificationsAsync,
+  scheduleHourlyDhikrNotifications,
+  scheduleMorningEveningAzkarNotifications,
   scheduleDailyPrayerNotifications,
   schedulePrayerReminderAsync,
 } from '../../src/lib/notifications';
+import { fetchAzkarCollection } from '../../src/features/azkar/service';
 import { theme } from '../../src/lib/theme';
 import { useAppStore } from '../../src/store/app-store';
 
@@ -107,8 +110,20 @@ export default function PrayerScreen() {
     }
 
     await cancelScheduledNotificationsAsync();
-    await scheduleDailyPrayerNotifications(settings.location, settings.calculationMethod, { includeAzanLabel: true });
-    Alert.alert('تمت الجدولة', 'تمت إضافة تذكيرات اليوم كاملة مع عناوين الأذان ومواقيت الصلاة.');
+    await scheduleDailyPrayerNotifications(settings.location, settings.calculationMethod, {
+      includeAzanLabel: true,
+      adhanSound: settings.adhanSound,
+    });
+    if (settings.morningEveningReminders) {
+      await scheduleMorningEveningAzkarNotifications();
+    }
+    const hourlyEntries = await fetchAzkarCollection('morning');
+    await scheduleHourlyDhikrNotifications(
+      hourlyEntries.map((item) => ({ id: item.id, text: item.text })),
+      settings.hourlyReminderMinutes ?? 60,
+      10
+    );
+    Alert.alert('تمت الجدولة', 'تمت إضافة الأذان وتذكيرات الصباح والمساء وورد الساعة لليوم.');
   }
 
   return (

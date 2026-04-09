@@ -20,6 +20,9 @@ export default function SettingsScreen() {
   const setCalculationMethod = useAppStore((state) => state.setCalculationMethod);
   const setReciter = useAppStore((state) => state.setReciter);
   const setSeasonalMode = useAppStore((state) => state.setSeasonalMode);
+  const setHourlyReminderMinutes = useAppStore((state) => state.setHourlyReminderMinutes);
+  const setMorningEveningReminders = useAppStore((state) => state.setMorningEveningReminders);
+  const setAdhanSound = useAppStore((state) => state.setAdhanSound);
   const setNotificationsEnabled = useAppStore((state) => state.setNotificationsEnabled);
   const { user } = useAuthUser();
 
@@ -49,6 +52,9 @@ export default function SettingsScreen() {
           <GhostButton label="القارئ: مشاري العفاسي" onPress={() => setReciter('مشاري العفاسي')} />
           <GhostButton label="القارئ: السديس" onPress={() => setReciter('عبدالرحمن السديس')} />
           <GhostButton label={settings.seasonalMode === 'ramadan' ? 'رمضان: مفعّل' : 'رمضان: تلقائي'} onPress={() => setSeasonalMode(settings.seasonalMode === 'ramadan' ? 'auto' : 'ramadan')} />
+          <GhostButton label={`ورد الساعة: ${settings.hourlyReminderMinutes ?? 60} دقيقة`} onPress={() => setHourlyReminderMinutes(settings.hourlyReminderMinutes === 60 ? 120 : 60)} />
+          <GhostButton label={settings.morningEveningReminders ? 'أذكار الصباح/المساء: مفعلة' : 'أذكار الصباح/المساء: متوقفة'} onPress={() => setMorningEveningReminders(!settings.morningEveningReminders)} />
+          <GhostButton label={settings.adhanSound === 'adhan' ? 'صوت الإشعار: أذان' : 'صوت الإشعار: افتراضي'} onPress={() => setAdhanSound(settings.adhanSound === 'adhan' ? 'default' : 'adhan')} />
         </View>
       </SurfaceCard>
 
@@ -80,6 +86,12 @@ export default function SettingsScreen() {
           </Link>
           <Link href="/features/companion" asChild>
             <GhostButton label="الرفيق اليومي" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/calendar" asChild>
+            <GhostButton label="التقويم الهجري" onPress={() => undefined} />
+          </Link>
+          <Link href="/features/seerah" asChild>
+            <GhostButton label="السيرة والقصص" onPress={() => undefined} />
           </Link>
           <Link href="/features/qibla" asChild>
             <GhostButton label="القبلة" onPress={() => undefined} />

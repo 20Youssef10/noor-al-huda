@@ -45,7 +45,12 @@ export default function HadithFeatureScreen() {
       />
       <View style={styles.collectionsRow}>
         {(collectionsQuery.data ?? []).map((item) => (
-          <GhostButton key={item.id} label={`${item.title} (${item.count})`} onPress={() => setCollectionId(item.id)} />
+          <GhostButton key={item.id} label={`${item.title}`} onPress={() => setCollectionId(item.id)} />
+        ))}
+      </View>
+      <View style={styles.groupsRow}>
+        {[...new Set((collectionsQuery.data ?? []).map((item) => item.bookGroup).filter(Boolean))].map((group) => (
+          <Text key={group} style={styles.groupLabel}>{group}</Text>
         ))}
       </View>
       {hadithQuery.isLoading ? (
@@ -90,6 +95,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+  },
+  groupsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  groupLabel: {
+    color: theme.colors.goldLight,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12,
+    textAlign: 'right',
   },
   list: {
     gap: 12,

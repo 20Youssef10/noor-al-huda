@@ -1,50 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import * as Speech from 'expo-speech';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
-import { z } from 'zod';
 
 import { GhostButton, Page, SectionHeader, SurfaceCard } from '../../src/components/ui';
 import { flagContent } from '../../src/features/content/flags';
-import { jsonRequest } from '../../src/lib/api';
+import { fetchHadithDetail } from '../../src/features/hadith/service';
 import { theme } from '../../src/lib/theme';
 import { VerificationBadge } from '../../src/shared/components/VerificationBadge';
-
-const hadithDetailSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  hadeeth: z.string(),
-  attribution: z.string().optional(),
-  grade: z.string().optional(),
-});
+import { useState } from 'react';
 
 export default function HadithDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id: string }>();
   const hadithId = params.id ?? '65290';
+  const [showEnglish, setShowEnglish] = useState(false);
   const query = useQuery({
     queryKey: ['hadith-detail', hadithId],
-    queryFn: async () => {
-      try {
-        const response = await fetch(`https://hadeethenc.com/api/v1/hadeeths/one/?language=ar&id=${hadithId}`);
-        if (!response.ok) {
-          throw new Error(`hadith-failed-${response.status}`);
-        }
-        const payload = hadithDetailSchema.parse(await response.json());
-        return {
-          id: payload.id,
-          title: payload.title,
-          text: payload.hadeeth,
-          source: payload.attribution ?? payload.grade ?? 'موسوعة الحديث',
-        };
-      } catch {
-        return jsonRequest(`/api/hadith/daily`, z.object({
-          id: z.string(),
-          title: z.string(),
-          text: z.string(),
-          source: z.string(),
-        }));
-      }
-    },
+    queryFn: () => fetchHadithDetail(hadithId),
   });
 
   return (
@@ -72,9 +45,19 @@ export default function HadithDetailScreen() {
               verified_at: new Date().toISOString().slice(0, 10),
             }}
           />
-          <Text style={styles.body}>{query.data.text}</Text>
+          <Text style={styles.body}>{showEnglish && query.data.englishText ? query.data.englishText : query.data.text}</Text>
           <Text style={styles.source}>{query.data.source}</Text>
           <View style={styles.actions}>
+            {query.data.englishText ? (
+              <GhostButton
+                label={showEnglish ? 'العرض بالعربية' : 'العرض بالإنجليزية'}
+                onPress={() => setShowEnglish((value) => !value)}
+              />
+            ) : null}
+            <GhostButton
+              label="استماع"
+              onPress={() => Speech.speak(showEnglish && query.data.englishText ? query.data.englishText : query.data.text, { language: showEnglish ? 'en-US' : 'ar-SA' })}
+            />
             <GhostButton
               label="الإبلاغ كمصدر غير صحيح"
               onPress={() => {

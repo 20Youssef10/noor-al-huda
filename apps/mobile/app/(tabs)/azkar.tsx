@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import * as Speech from 'expo-speech';
 
 import { Page, SectionHeader, SurfaceCard, GhostButton } from '../../src/components/ui';
 import { fetchAzkarCatalog, fetchAzkarCategory, fetchAzkarCollection } from '../../src/features/azkar/service';
@@ -105,7 +106,10 @@ export default function AzkarScreen() {
                 <Text style={styles.virtueText}>{item.virtue}</Text>
                 <View style={styles.counterRow}>
                   <Text style={styles.counterText}>{progress} / {item.count}</Text>
-                  <GhostButton label={done ? 'أُنجز' : 'تسبيحة'} onPress={() => incrementAzkar(item.id)} />
+                  <View style={styles.counterActions}>
+                    <GhostButton label="استماع" onPress={() => Speech.speak(item.text, { language: 'ar-SA' })} />
+                    <GhostButton label={done ? 'أُنجز' : 'تسبيحة'} onPress={() => incrementAzkar(item.id)} />
+                  </View>
                 </View>
               </SurfaceCard>
             );
@@ -168,6 +172,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  counterActions: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
   },
   counterText: {
     color: theme.colors.goldLight,

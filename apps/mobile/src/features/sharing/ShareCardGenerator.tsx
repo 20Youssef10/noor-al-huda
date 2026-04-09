@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
@@ -31,8 +31,13 @@ const templateMap: Record<ShareCardProps['template_id'], { background: string; a
 
 export function ShareCardGenerator(props: ShareCardProps) {
   const ref = useRef<ViewShot>(null);
-  const palette = templateMap[props.template_id];
-  const height = props.format === 'story' ? 640 : 420;
+  const [content, setContent] = useState(props.content_ar);
+  const [source, setSource] = useState(props.source);
+  const [templateId, setTemplateId] = useState<ShareCardProps['template_id']>(props.template_id);
+  const [format, setFormat] = useState<ShareCardProps['format']>(props.format);
+  const [customBackground, setCustomBackground] = useState('');
+  const palette = useMemo(() => templateMap[templateId], [templateId]);
+  const height = format === 'story' ? 640 : 420;
 
   async function captureAndShare() {
     const uri = await ref.current?.capture?.();
@@ -43,10 +48,24 @@ export function ShareCardGenerator(props: ShareCardProps) {
 
   return (
     <SurfaceCard>
-      <ViewShot ref={ref} options={{ format: 'png', quality: 1 }} style={[styles.card, { backgroundColor: palette.background, height }]}> 
-        <View style={[styles.border, { borderColor: palette.accent }]}>
-          <Text style={[styles.content, { color: palette.text }]}>{props.content_ar}</Text>
-          <Text style={[styles.source, { color: palette.accent }]}>{props.source}</Text>
+      <View style={styles.controls}>
+        <TextInput style={styles.input} value={content} onChangeText={setContent} placeholder="النص" placeholderTextColor={theme.colors.creamFaint} multiline textAlign="right" />
+        <TextInput style={styles.input} value={source} onChangeText={setSource} placeholder="المصدر" placeholderTextColor={theme.colors.creamFaint} textAlign="right" />
+        <TextInput style={styles.input} value={customBackground} onChangeText={setCustomBackground} placeholder="لون الخلفية #0D3D22" placeholderTextColor={theme.colors.creamFaint} textAlign="left" />
+        <View style={styles.chips}>
+          {[1,2,3,4,5,6,7,8,9,10,11,12].map((item) => (
+            <GhostButton key={item} label={`قالب ${item}`} onPress={() => setTemplateId(item as ShareCardProps['template_id'])} />
+          ))}
+        </View>
+        <View style={styles.chips}>
+          <GhostButton label="Story" onPress={() => setFormat('story')} />
+          <GhostButton label="Square" onPress={() => setFormat('square')} />
+        </View>
+      </View>
+      <ViewShot ref={ref} options={{ format: 'png', quality: 1 }} style={[styles.card, { backgroundColor: customBackground || palette.background, height }]}> 
+        <View style={[styles.border, { borderColor: palette.accent }]}> 
+          <Text style={[styles.content, { color: palette.text }]}>{content}</Text>
+          <Text style={[styles.source, { color: palette.accent }]}>{source}</Text>
           <Text style={[styles.brand, { color: palette.text }]}>نور الهدى</Text>
         </View>
       </ViewShot>
@@ -56,6 +75,17 @@ export function ShareCardGenerator(props: ShareCardProps) {
 }
 
 const styles = StyleSheet.create({
+  controls: { gap: 10 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  input: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceStrong,
+    color: theme.colors.cream,
+    padding: 14,
+    fontFamily: theme.fonts.body,
+  },
   card: { width: '100%', borderRadius: 28, overflow: 'hidden' },
   border: { flex: 1, margin: 24, borderWidth: 2, borderRadius: 22, padding: 24, justifyContent: 'space-between' },
   content: { fontFamily: theme.fonts.arabic, fontSize: 28, lineHeight: 48, textAlign: 'right' },
