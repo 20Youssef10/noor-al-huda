@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 
 import { fallbackDailyContent } from '../data/fallback';
+import { requireAuth } from '../middleware/auth';
 import { readCache, writeCache } from '../services/cache';
 import { computeHalalVerdict } from '../services/halal';
 import { queueBackgroundTask } from '../services/runtime';
@@ -10,7 +11,7 @@ import { getSurahList } from '../services/quran';
 import { type Env } from '../types';
 
 const duaInputSchema = z.object({
-  situation: z.string().min(3),
+  situation: z.string().min(3).max(500),
   language: z.enum(['ar', 'en']).default('ar'),
 });
 
@@ -34,7 +35,7 @@ function isFileLike(value: unknown): value is FileLike {
 }
 
 const searchSchema = z.object({
-  q: z.string().min(1),
+  q: z.string().min(1).max(200),
   limit: z.coerce.number().min(1).max(20).default(10),
 });
 
@@ -50,7 +51,7 @@ const companionResultSchema = z.object({
 });
 
 const assistantInputSchema = z.object({
-  question: z.string().min(3),
+  question: z.string().min(3).max(500),
 });
 
 const assistantResultSchema = z.object({
@@ -59,7 +60,7 @@ const assistantResultSchema = z.object({
 });
 
 const quizInputSchema = z.object({
-  topic: z.string().min(2),
+  topic: z.string().min(2).max(200),
 });
 
 const quizResultSchema = z.object({
@@ -74,7 +75,7 @@ const quizResultSchema = z.object({
 });
 
 const moodInputSchema = z.object({
-  mood: z.string().min(2),
+  mood: z.string().min(2).max(200),
 });
 
 const moodResultSchema = z.object({
@@ -85,7 +86,7 @@ const moodResultSchema = z.object({
 
 export const aiRoutes = new Hono<{ Bindings: Env }>();
 
-aiRoutes.post('/assistant/ask', async (c) => {
+aiRoutes.post('/assistant/ask', requireAuth, async (c) => {
   const { question } = assistantInputSchema.parse(await c.req.json());
   const fallback = {
     answer: `بخصوص سؤالك: ${question}، ارجع إلى النصوص المحكمة وأقوال أهل العلم الثقات، وابدأ بالأدلة الواضحة ثم اسأل عالماً موثوقاً عند الاشتباه.`,
@@ -110,7 +111,7 @@ aiRoutes.post('/assistant/ask', async (c) => {
   }
 });
 
-aiRoutes.post('/quiz/generate', async (c) => {
+aiRoutes.post('/quiz/generate', requireAuth, async (c) => {
   const { topic } = quizInputSchema.parse(await c.req.json());
   const fallback = {
     title: `اختبار في ${topic}`,
@@ -146,7 +147,7 @@ aiRoutes.post('/quiz/generate', async (c) => {
   }
 });
 
-aiRoutes.post('/mood/suggest', async (c) => {
+aiRoutes.post('/mood/suggest', requireAuth, async (c) => {
   const { mood } = moodInputSchema.parse(await c.req.json());
   const fallback = {
     suggestion: `إذا كنت تشعر بـ ${mood} فابدأ بورد قصير من القرآن ثم استغفار وذكر هادئ.`,
@@ -172,7 +173,7 @@ aiRoutes.post('/mood/suggest', async (c) => {
   }
 });
 
-aiRoutes.post('/dua/generate', async (c) => {
+aiRoutes.post('/dua/generate', requireAuth, async (c) => {
   const { situation } = duaInputSchema.parse(await c.req.json());
   const fallback = {
     dua: `اللهم يا واسع الرحمة، أصلح أمري في ${situation}، واهد قلبي لما تحب وترضى، واجعل لي من أمري فرجاً ومخرجاً [سورة البقرة: 286].`,
@@ -208,7 +209,7 @@ aiRoutes.post('/dua/generate', async (c) => {
   }
 });
 
-aiRoutes.post('/companion/daily', async (c) => {
+aiRoutes.post('/companion/daily', requireAuth, async (c) => {
   const { history } = companionSchema.parse(await c.req.json());
   const cacheKey = `companion:v2:daily:${new Date().toISOString().split('T')[0]}`;
   const cached = await readCache(c.env, 'PRAYER_CACHE', cacheKey);
@@ -336,8 +337,8 @@ async function createSemanticEmbedding(env: Env, text: string) {
   return null;
 }
 
-aiRoutes.post('/ruya/reflect', async (c) => {
-  const body = z.object({ dream: z.string().min(3) }).parse(await c.req.json());
+aiRoutes.post('/ruya/reflect', requireAuth, async (c) => {
+  const body = z.object({ dream: z.string().min(3).max(1000) }).parse(await c.req.json());
   const fallback = {
     reflection: 'ابدأ بذكر الله عند الاستيقاظ، ولا تحدّث برؤياك إلا من تثق بعلمه ونصحه. الرؤى باب لطيف لكن تأويلها علم دقيق. إن كانت الرؤيا مزعجة فاستعذ بالله منها ولا تشغل قلبك بها. الرجوع لعالم متخصص إذا أثرت الرؤيا نفسياً.'
   };
@@ -359,7 +360,7 @@ aiRoutes.post('/ruya/reflect', async (c) => {
   return c.json({ reflection: result.response?.trim() || fallback.reflection });
 });
 
-aiRoutes.post('/voice/command', async (c) => {
+aiRoutes.post('/voice/command', requireAuth, async (c) => {
   const form = await c.req.formData();
   const transcriptFallback = String(form.get('text') ?? '').trim();
   let text = transcriptFallback;
@@ -393,7 +394,7 @@ aiRoutes.post('/voice/command', async (c) => {
   }
 });
 
-aiRoutes.post('/tajweed/analyze', async (c) => {
+aiRoutes.post('/tajweed/analyze', requireAuth, async (c) => {
   const form = await c.req.formData();
   const surah = Number(form.get('surah') ?? 1);
   const ayah = Number(form.get('ayah') ?? 1);
