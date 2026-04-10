@@ -230,7 +230,8 @@ export async function loadTrackerEntries(userId: string) {
 }
 
 export async function createKhatmGroup(userId: string, name: string) {
-  const inviteCode = `NOOR${Math.floor(10 + Math.random() * 89)}`;
+  const randomBytes = crypto.getRandomValues(new Uint8Array(4));
+  const inviteCode = `NOOR${Array.from(randomBytes, (b) => b.toString(36)).join('').toUpperCase().slice(0, 6)}`;
   const groupRef = await addDoc(collection(db, 'khatm_groups'), {
     name,
     created_by: userId,

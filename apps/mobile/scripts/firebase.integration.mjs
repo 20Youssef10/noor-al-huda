@@ -24,7 +24,7 @@ const app = initializeApp(firebaseConfig, `integration-${Date.now()}`);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const email = `integration+${Date.now()}@example.invalid`;
-const password = 'NoorAlHuda123!';
+const password = process.env.FIREBASE_TEST_PASSWORD ?? 'NoorAlHuda123!';
 const magicEmail = `magic+${Date.now()}@example.invalid`;
 
 const actionCodeSettings = {
