@@ -1,9 +1,15 @@
-export interface Env {
-  PRAYER_CACHE: KVNamespace;
-  QURAN_CACHE: KVNamespace;
-  HADITH_CACHE: KVNamespace;
-  RADIO_LIST: KVNamespace;
-  AZKAR_CACHE: KVNamespace;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Binding = any;
+
+// Custom environment type for Cloudflare Workers
+// This is different from Hono's built-in Env type which expects Bindings/Variables
+export type Env = {
+  // Bindings - Cloudflare Workers KV, R2, etc.
+  PRAYER_CACHE: Binding;
+  QURAN_CACHE: Binding;
+  HADITH_CACHE: Binding;
+  RADIO_LIST: Binding;
+  AZKAR_CACHE: Binding;
   AI?: {
     run(model: string, payload: unknown): Promise<unknown>;
   };
@@ -12,10 +18,48 @@ export interface Env {
       matches: Array<{ score: number; metadata?: Record<string, unknown> }>;
     }>;
   };
-  MEDIA_BUCKET?: R2Bucket;
+  MEDIA_BUCKET?: {
+    get(key: string): Promise<{ body: ReadableStream } | null>;
+    put(key: string, value: unknown): Promise<void>;
+  };
   FIREBASE_PROJECT_ID: string;
   FIREBASE_WEB_API_KEY?: string;
-}
+
+  // Variables - custom context variables
+  firebaseToken?: string;
+  firebaseUserId?: string;
+  firebaseUserEmail?: string | null;
+};
+
+// Re-export Hono's Env type for compatibility with Hono middleware
+export type HonoEnv = {
+  Bindings: {
+    PRAYER_CACHE: Binding;
+    QURAN_CACHE: Binding;
+    HADITH_CACHE: Binding;
+    RADIO_LIST: Binding;
+    AZKAR_CACHE: Binding;
+    AI?: {
+      run(model: string, payload: unknown): Promise<unknown>;
+    };
+    QURAN_VECTORS?: {
+      query(vector: number[], options: { topK: number; returnMetadata: 'all' | 'none' }): Promise<{
+        matches: Array<{ score: number; metadata?: Record<string, unknown> }>;
+      }>;
+    };
+    MEDIA_BUCKET?: {
+      get(key: string): Promise<{ body: ReadableStream } | null>;
+      put(key: string, value: unknown): Promise<void>;
+    };
+    FIREBASE_PROJECT_ID: string;
+    FIREBASE_WEB_API_KEY?: string;
+  };
+  Variables: {
+    firebaseToken?: string;
+    firebaseUserId?: string;
+    firebaseUserEmail?: string | null;
+  };
+};
 
 export type PrayerResponse = {
   locationLabel: string;

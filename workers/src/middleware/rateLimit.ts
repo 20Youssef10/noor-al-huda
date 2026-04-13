@@ -1,10 +1,10 @@
 import { createMiddleware } from 'hono/factory';
 
-import { type Env } from '../types';
+import { type HonoEnv } from '../types';
 import { queueBackgroundTask } from '../services/runtime';
 
 export function rateLimit(limit = 120, windowMs = 60_000) {
-  return createMiddleware<{ Bindings: Env }>(async (c, next) => {
+  return createMiddleware<HonoEnv>(async (c, next) => {
     const now = Date.now();
     const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
     const resetAt = now + windowMs;

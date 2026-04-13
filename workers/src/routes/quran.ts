@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 
 import { getSurahDetail, getSurahList } from '../services/quran';
-import { type Env } from '../types';
+import { type HonoEnv } from '../types';
 
-export const quranRoutes = new Hono<{ Bindings: Env }>();
+export const quranRoutes = new Hono<HonoEnv>();
 
 quranRoutes.get('/quran/surahs', async (c) => {
   const payload = await getSurahList(c.env);

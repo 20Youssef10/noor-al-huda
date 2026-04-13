@@ -4,9 +4,9 @@ import { z } from 'zod';
 import { fallbackAzkar, fallbackDailyContent, fallbackRadios } from '../data/fallback';
 import { readCache, writeCache } from '../services/cache';
 import { queueBackgroundTask } from '../services/runtime';
-import { type Env } from '../types';
+import { type HonoEnv } from '../types';
 
-export const contentRoutes = new Hono<{ Bindings: Env }>();
+export const contentRoutes = new Hono<HonoEnv>();
 
 const hadithListSchema = z.object({
   data: z.array(

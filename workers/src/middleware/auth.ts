@@ -1,7 +1,7 @@
 import { createMiddleware } from 'hono/factory';
-import { type Env } from '../types';
+import type { HonoEnv } from '../types';
 
-export const optionalAuth = createMiddleware<{ Bindings: Env }>(async (c, next) => {
+export const optionalAuth = createMiddleware<HonoEnv>(async (c, next) => {
   const authorization = c.req.header('authorization');
   if (authorization?.startsWith('Bearer ')) {
     const firebaseToken = authorization.slice(7);

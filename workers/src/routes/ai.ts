@@ -7,7 +7,7 @@ import { computeHalalVerdict } from '../services/halal';
 import { queueBackgroundTask } from '../services/runtime';
 import { computeTajweedScore } from '../services/tajweed';
 import { getSurahList } from '../services/quran';
-import { type Env } from '../types';
+import { type HonoEnv } from '../types';
 
 const duaInputSchema = z.object({
   situation: z.string().min(3),
@@ -83,7 +83,7 @@ const moodResultSchema = z.object({
   dhikr: z.string(),
 });
 
-export const aiRoutes = new Hono<{ Bindings: Env }>();
+export const aiRoutes = new Hono<HonoEnv>();
 
 aiRoutes.post('/assistant/ask', async (c) => {
   const { question } = assistantInputSchema.parse(await c.req.json());
@@ -321,7 +321,7 @@ aiRoutes.get('/quran/search', async (c) => {
   return c.json({ query: q, results: ayat });
 });
 
-async function createSemanticEmbedding(env: Env, text: string) {
+async function createSemanticEmbedding(env: HonoEnv['Bindings'], text: string) {
   if (env.AI) {
     try {
       const embeddingResult = await env.AI.run('@cf/baai/bge-base-en-v1.5', { text }) as { data?: number[][] | number[] };

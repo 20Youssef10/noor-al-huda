@@ -1,8 +1,8 @@
-import { type Env } from '../types';
+import { type Env, type HonoEnv } from '../types';
 
-type CacheBinding = keyof Pick<Env, 'PRAYER_CACHE' | 'QURAN_CACHE' | 'HADITH_CACHE' | 'RADIO_LIST' | 'AZKAR_CACHE'>;
+type CacheBinding = keyof Pick<HonoEnv['Bindings'], 'PRAYER_CACHE' | 'QURAN_CACHE' | 'HADITH_CACHE' | 'RADIO_LIST' | 'AZKAR_CACHE'>;
 
-export async function readCache<T>(env: Env, binding: CacheBinding, key: string): Promise<T | null> {
+export async function readCache<T>(env: HonoEnv['Bindings'], binding: CacheBinding, key: string): Promise<T | null> {
   const raw = await env[binding].get(key);
   if (!raw) {
     return null;
@@ -16,7 +16,7 @@ export async function readCache<T>(env: Env, binding: CacheBinding, key: string)
 }
 
 export async function writeCache(
-  env: Env,
+  env: HonoEnv['Bindings'],
   binding: CacheBinding,
   key: string,
   payload: unknown,

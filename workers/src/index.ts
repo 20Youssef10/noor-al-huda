@@ -7,9 +7,9 @@ import { contentRoutes } from './routes/content';
 import { aiRoutes } from './routes/ai';
 import { prayerRoutes } from './routes/prayer';
 import { quranRoutes } from './routes/quran';
-import { type Env } from './types';
+import { type HonoEnv } from './types';
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<HonoEnv>();
 
 app.use('/api/*', cors());
 app.use('/api/*', rateLimit());

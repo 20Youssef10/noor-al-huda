@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 
 import { getPrayerTimes } from '../services/prayer';
-import { type Env } from '../types';
+import { type HonoEnv } from '../types';
 
 const prayerQuerySchema = z.object({
   lat: z.coerce.number(),
@@ -10,7 +10,7 @@ const prayerQuerySchema = z.object({
   method: z.enum(['ummAlQura', 'egyptian', 'karachi']).default('ummAlQura')
 });
 
-export const prayerRoutes = new Hono<{ Bindings: Env }>();
+export const prayerRoutes = new Hono<HonoEnv>();
 
 prayerRoutes.get('/prayer-times', async (c) => {
   const query = prayerQuerySchema.parse(c.req.query());
